@@ -1,0 +1,15 @@
+/* Chat */
+.chats{width:100%;display:block;padding-bottom:120px;position:absolute;left:0}
+.chats li,.chats li .chatinfo{box-sizing:border-box}
+.chats li{float:left;width:100%;position:relative;padding:8px 20px}
+.chats li img{border-radius:100%;width:60px;height:60px;object-fit:cover;float:left}
+.chats li .chatinfo{width:calc(100% - 60px);margin-top:7px;padding-left:10px;float:left}
+.chats h4,.chats h5{margin:0;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:85%}
+.chats h4{font-size:1em;color:#212121;margin-bottom:-8px}
+.chats h5{font-size:.85em;font-weight:300;color:rgba(0,0,0,.7)}
+.chats li.sinabrir{background:#e7fff5}
+.chats li.sinabrir h5{font-weight:bold}
+.chats .alerta{text-align:center;min-width:25px;display:grid;position:absolute;right:20px;top:15px;z-index:1}
+.chats .alerta span,.chats .alerta strong{font-size:.75em;display:inline-block;clear:both}
+.chats .alerta span{font-weight:300;color:rgba(0,0,0,.4)}
+.chats .alerta strong{background:var(--colorprin);border-radius:50px;color:#fff;width:auto}

@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport"/>
+<title>Inicio Scraper</title>
+<link rel="stylesheet" type="text/css" href="css/general.css"/>
+<link rel="stylesheet" type="text/css" href="css/inicio-scraper.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fontisto@v3.0.4/css/fontisto/fontisto.min.css"/>
+</head>
+<body>
+<header>
+	<a href="index"><img src="img/logo.png"/></a>
+	<h5 class="hola">¡Hola Magalí!</h5>
+	<a class="notif"><img src="img/ico/notif.svg"/></a>
+</header>
+<section class="inicio-scraper mtopneg">
+	<div class="imgcliente">
+		<img src="img/ico/user.svg" class="fotoperfil"/>
+		<span>Cliente</span>
+	</div>
+	<div class="imgcliente">
+		<img src="img/ico/recicla.svg" class="fotoperfil"/>
+		<span>Scraper</span>
+	</div>
+	<div class="busca">
+		<input type="text" name="" class="formc" placeholder="¿Qué estás buscando?"/>
+		<button type="submit" class="formc"><i class="ico fi fi-search"></i></button>
+	</div>
+	<div class="cbi"></div>
+	<div class="categorias">
+		<a>
+			<img src="img/ico/cat/carton.svg"/>
+			<span>Cartón</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/metal.svg"/>
+			<span>Metales</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/plastico.svg"/>
+			<span>Plástico</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/madera.svg"/>
+			<span>Madera</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/cables.svg"/>
+			<span>Cables</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/electronico.svg"/>
+			<span>Electrónicos</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/textil.svg"/>
+			<span>Textiles</span>
+		</a>
+		<a>
+			<img src="img/ico/cat/maquinaria.svg"/>
+			<span>Maquinaria</span>
+		</a>
+	</div>
+	<div class="cbi"></div>
+	<button class="btn btn-sec">Ver todo</button>
+	<div class="cbi"></div>
+	<h4 class="mb15">Últimas postulaciones</h4>
+	<div class="slider mb5">
+		<a href="#">
+			<img src="img/slider/textil.jpg"/>
+			<span>Textil en Villa Lynch</span>
+		</a>
+		<a href="#">
+			<img src="img/slider/carton.jpg"/>
+			<span>Cartón en Tigre</span>
+		</a>
+		<a href="#">
+			<img src="img/slider/plastico.jpg"/>
+			<span>Plástico en Caballito</span>
+		</a>
+	</div>
+	<div class="cbi"></div>
+	<div class="banner mtop15">
+		<div class="infobanner">
+			<h1>¡Convertíte en Scraper!</h1>
+			<p>Sumate, vendé o doná y recibí ofertas</p>
+			<a href="#" class="btn btn-ter mtop5">Más información</a>
+		</div>
+		<img src="img/ser-scraper.jpg"/>
+	</div>
+	<div class="btnfix">
+		<a class="btn btn-sec">Mapa <i class="ico fi fi-map"></i></a>
+	</div>
+</section>
+<main>
+	<a href="perfil.html">
+		<img src="img/ico/menu/perfil.svg"/>
+		<span>Perfil</span>
+	</a>
+	<a href="chat-cliente.html">
+		<img src="img/ico/menu/chat.svg"/>
+		<span>Chat</span>
+	</a>
+	<a class="nuevo">
+		<img src="img/ico/menu/nuevo.svg"/>
+	</a>
+	<a href="postulaciones.html">
+		<img src="img/ico/menu/postulaciones.svg"/>
+		<span>Postulaciones</span>
+	</a>
+	<a href="anuncios.html">
+		<img src="img/ico/menu/anuncios.svg"/>
+		<span>Anuncios</span>
+	</a>
+</main>
+<script src="js/jquery.min.js"></script>
+<script src="js/slick.min.js"></script>
+<script>
+$('.slider').slick({
+	arrows:false,
+	dots:false,
+	infinite:false,
+});
+</script>
+</body>
+</html>

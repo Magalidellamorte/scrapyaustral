@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 0.52.0"
+  },
+  "build": {
+    "configuration_only": {
+      "node": "16.15.0"
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {}
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "pc-api-7264408197724796884-176-aed85e6c852a.json",
+        "track": "internal"
+      },
+      "ios": {
+        "ascAppId": "6467031017"
+      }
+    }
+  }
+}

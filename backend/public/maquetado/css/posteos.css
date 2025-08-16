@@ -1,0 +1,26 @@
+/* Posteos */
+.posteo{box-shadow:0 5px 15px -5px rgba(0,0,0,.15);border-radius:10px;margin-bottom:20px;overflow:hidden;display:block}
+.posteo .imgprin{border-radius:10px 10px 0 0;position:relative;overflow:hidden}
+.posteo .imgprin span{border-radius:10px;position:absolute;left:10px;top:10px;padding:4px 10px 3px 10px}
+.posteo.venta .imgprin span{background:var(--colorprin);color:#fff}
+.posteo.dona .imgprin span{background:#dbfff0;color:#047e4b}
+.posteo .imgprin img{width:100%;height:150px;object-fit:cover;display:block}
+.posteo .info{padding:10px}
+.posteo .avatar{width:100%;float:left;position:relative}
+.posteo .avatar img{border-radius:100%;width:45px;height:45px;object-fit:cover;float:left}
+.posteo .avatar span{font-size:1em;width:calc(100% - 45px);padding-left:5px;float:left;box-sizing:border-box}
+.posteo .avatar span.cal{font-size:.75em;color:#858585;margin-top:-5px}
+.posteo .avatar span .ico{font-size:.8em;color:#8fe5c0;width:auto}
+.posteo .avatar .btn{font-size:1em;width:auto;padding:4px 15px 2px;position:absolute;right:0;top:5px}
+.posteo.ofertado .avatar .btn{background:none;border-color:transparent;color:#858585}
+.posteo.ofertado .avatar span.btn .ico{font-size:.6em}
+.posteo h2,.posteo h3,.posteo h4{font-family:'Catamaran',sans-serif;font-weight:300;letter-spacing:0}
+.posteo h2{font-size:1.1em;font-weight:bold;color:#212121;letter-spacing:-.5px;margin-bottom:-8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.posteo h3{font-size:.8em;color:#858585}
+.posteo h4{font-size:.6em;text-transform:uppercase;font-weight:bold;color:#858585;margin:0;padding:0}
+.slider-cat,.slider-cat *{transition:all .3s}
+.slider-cat img{background:blue;border-radius:18px;width:55px;height:55px;float:left;object-fit:cover}
+.slider-cat li a{width:90%;min-width:35vw;margin-bottom:10px;float:left}
+.slider-cat li a span{font-size:1em;margin:14px 0 0 7px;float:left}
+.slider-cat .slick-list{overflow:initial}
+.anuncios h2{font-size:1.2em}

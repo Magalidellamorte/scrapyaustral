@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport"/>
+<title>Mis anuncios</title>
+<link rel="stylesheet" type="text/css" href="css/general.css"/>
+<link rel="stylesheet" type="text/css" href="css/posteos.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fontisto@v3.0.4/css/fontisto/fontisto.min.css"/>
+</head>
+<body>
+<header class="noburb">
+	<a href="index"><img src="img/logo.png"/></a>
+	<a class="notif"><img src="img/ico/notif.svg"/></a>
+</header>
+<section class="anuncios mtop15 padmenu">
+	<h2 class="mb5">Encontrá lo que buscás</h2>
+	<ul class="slider-cat mb15">
+		<li>
+			<a>
+				<img src="img/slider/cat/carton.jpg"/>
+				<span>Cartón</span>
+			</a>
+			<a>
+				<img src="img/slider/cat/metal.jpg"/>
+				<span>Metales</span>
+			</a>
+		</li>
+		<li>
+			<a>
+				<img src="img/slider/cat/plastico.jpg"/>
+				<span>Plástico</span>
+			</a>
+			<a>
+				<img src="img/slider/cat/madera.jpg"/>
+				<span>Madera</span>
+			</a>
+		</li>
+		<li>
+			<a>
+				<img src="img/slider/cat/cables.jpg"/>
+				<span>Cables</span>
+			</a>
+			<a>
+				<img src="img/slider/cat/electronico.jpg"/>
+				<span>Electrónicos</span>
+			</a>
+		</li>
+		<li>
+			<a>
+				<img src="img/slider/cat/textil.jpg"/>
+				<span>Textiles</span>
+			</a>
+			<a>
+				<img src="img/slider/cat/maquinaria.jpg"/>
+				<span>Maquinaria</span>
+			</a>
+		</li>
+	</ul>
+	<div class="cbi"></div>
+	<h2 class="mb5">Últimos anuncios</h2>
+	<div class="cbi"></div>
+	<a class="posteo dona" href="#">
+		<div class="imgprin">
+			<span>Donación</span>
+			<img src="img/slider/carton.jpg"/>
+		</div>
+		<div class="info">
+			<div class="sobre">
+				<h4>Cartones - Cajas</h4>
+				<h2>Cajas de cartón de 2021</h2>
+				<h3>Villa Urquiza - Capital Federal</h3>
+			</div>
+			<div class="cbi"></div>
+			<div class="avatar mtop5">
+				<img src="https://randomuser.me/api/portraits/men/82.jpg"/>
+				<span>@airkur</span>
+				<span class="cal"><i class="ico fi fi-star"></i> 4.8</span>
+				<span class="btn btn-sec">Me interesa</span>
+			</div>
+			<div class="cbi"></div>
+		</div>
+	</a>
+	<a class="posteo venta" href="#">
+		<div class="imgprin">
+			<span>Venta</span>
+			<img src="img/slider/plastico.jpg"/>
+		</div>
+		<div class="info">
+			<div class="sobre">
+				<h4>Plástico - Juguetes</h4>
+				<h2>Cajas de cartón de 2021</h2>
+				<h3>Monserrat - Capital Federal</h3>
+			</div>
+			<div class="cbi"></div>
+			<div class="avatar mtop5">
+				<img src="https://randomuser.me/api/portraits/women/22.jpg"/>
+				<span>@lepomulli</span>
+				<span class="cal"><i class="ico fi fi-star"></i> 4.8</span>
+				<span class="btn">Ofertar</span>
+			</div>
+			<div class="cbi"></div>
+		</div>
+	</a>
+	<a class="posteo venta ofertado" href="#">
+		<div class="imgprin">
+			<span>Venta</span>
+			<img src="img/slider/textil.jpg"/>
+		</div>
+		<div class="info">
+			<div class="sobre">
+				<h4>Textil - Bufandas</h4>
+				<h2>Bufandas sin uso</h2>
+				<h3>Puerto Madero - Capital Federal</h3>
+			</div>
+			<div class="cbi"></div>
+			<div class="avatar mtop5">
+				<img src="https://randomuser.me/api/portraits/women/21.jpg"/>
+				<span>@orianamufa</span>
+				<span class="cal"><i class="ico fi fi-star"></i> 4.8</span>
+				<span class="btn"><i class="ico fi fi-check"></i> Ofertado</span>
+			</div>
+			<div class="cbi"></div>
+		</div>
+	</a>
+	<div class="btnfix">
+		<a class="btn btn-sec">Filtrar <i class="ico fi fi-filter"></i></a>
+	</div>
+</section>
+<main>
+	<a href="perfil.html">
+		<img src="img/ico/menu/perfil.svg"/>
+		<span>Perfil</span>
+	</a>
+	<a href="chat-cliente.html">
+		<img src="img/ico/menu/chat.svg"/>
+		<span>Chat</span>
+	</a>
+	<a class="nuevo">
+		<img src="img/ico/menu/nuevo.svg"/>
+	</a>
+	<a href="postulaciones.html">
+		<img src="img/ico/menu/postulaciones.svg"/>
+		<span>Postulaciones</span>
+	</a>
+	<a class="activo">
+		<img src="img/ico/menu/anuncios.svg"/>
+		<span>Anuncios</span>
+	</a>
+</main>
+<script src="js/jquery.min.js"></script>
+<script src="js/slick.min.js"></script>
+<script>
+$('.slider-cat').slick({
+	show:1,
+	arrows:false,
+	dots:false,
+	infinite:false,
+	variableWidth: true
+});
+</script>
+</body>
+</html>

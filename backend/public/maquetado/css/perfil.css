@@ -1,0 +1,5 @@
+/* Perfil */
+.fotoperfil{border-radius:100%;border:solid 5px #fff;box-shadow:0 0 0 2px #efefef;width:100px;height:100px;margin:0 auto;display:block;position:relative;z-index:1}
+.perfil .btn{width:100%;display:block;box-sizing:border-box}
+.perfil ul{font-size:var(--em);margin-top:20px}
+.perfil ul li a{display:block;padding:13px 0}

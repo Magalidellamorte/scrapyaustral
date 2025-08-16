@@ -1,0 +1,13 @@
+/* Inicio Scraper */
+.fotoperfil{background:#fff;border-radius:100%;border:solid 5px #fff;box-shadow:0 0 0 2px #efefef;width:100px;height:100px;margin:0 auto;padding:20px;display:block;position:relative;z-index:1;box-sizing:border-box}
+.inicio-scraper .btn{width:100%}
+img.recicla{max-width:200px;margin:0 auto;display:block}
+.inicio-scraper{text-align:center}
+.inicio-scraper h4{font-size:1.3em;text-align:left;line-height:1;color:#212121}
+.inicio-scraper .imgcliente{width:130px;text-align:center;color:#878787;display:inline-block;margin-bottom:15px}
+.busca{position:relative}
+.busca button{background:var(--colorprin);border-color:var(--colorprin);width:auto;margin:0;padding:6px 10px;height:auto;position:absolute;top:5px;right:5px;bottom:5px}
+.busca .ico{color:#fff}
+.categorias{display:flex;flex-wrap:wrap;flex:0 0 20%;margin:0 -5px 5px -5px;justify-content:space-between}
+.categorias a{width:20%;margin:5px 5px 15px}
+.categorias a img{width:55%;height:55px;display:block;margin:0 auto;object-fit:contain;opacity:.6}

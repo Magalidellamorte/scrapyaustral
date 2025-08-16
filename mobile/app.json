@@ -1,0 +1,92 @@
+{
+  "expo": {
+    "permissions": [
+      "LOCATION"
+    ],
+    "name": "Scrapy",
+    "slug": "scrapy",
+    "version": "1.3.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "buildNumber": "1.3.1",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAT8BU1mUmE3IgvSfLQjRpJeCHVxBsko4g"
+      },
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Necesitamos acceder a tu ubicación para mostrarte ventas y donaciones cercanas a tu ubicación.",
+        "NSPhotoLibraryUsageDescription": "Para poder subir fotos de scrap y de perfil",
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
+      },
+      "bundleIdentifier": "scrapy.app"
+    },
+    "packagerOpts": {
+      "config": "metro.config.js",
+      "sourceExts": [
+        "js",
+        "jsx",
+        "svg",
+        "ts",
+        "tsx"
+      ]
+    },
+    "android": {
+      "versionCode": 1301,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAT8BU1mUmE3IgvSfLQjRpJeCHVxBsko4g"
+        }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "scrapy.app"
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c8182c21-1612-46aa-8167-a66b942e34d6"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "16.1"
+          }
+        }
+      ],
+      "expo-font"
+    ],
+    "owner": "scrapy.app"
+  }
+}

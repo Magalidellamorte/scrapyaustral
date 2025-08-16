@@ -1,0 +1,7 @@
+/* Inicio cliente */
+.fotoperfil{background:#fff;border-radius:100%;border:solid 5px #fff;box-shadow:0 0 0 2px #efefef;width:100px;height:100px;margin:0 auto;padding:20px;display:block;position:relative;z-index:1;box-sizing:border-box}
+.cliente .btn{width:100%}
+img.recicla{max-width:200px;margin:0 auto;display:block}
+.cliente{text-align:center}
+.cliente h4{font-size:var(--em);line-height:1;text-align:center;color:#212121}
+.cliente .imgcliente{width:130px;text-align:center;color:#878787;display:inline-block;margin-bottom:15px}
