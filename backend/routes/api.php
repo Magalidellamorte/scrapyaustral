@@ -28,6 +28,10 @@ use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\ZoneScheduleController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('__docs_dummy', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 Route::group([
     'prefix' => 'auth'
 ], function () {

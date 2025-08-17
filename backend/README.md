@@ -126,3 +126,26 @@ Manual steps:
    curl -X GET http://127.0.0.1:8000/api/offer_types
    ```
    It should return `[{"id":1,"name":"Vender","enabled":"1"},{"id":2,"name":"Donar","enabled":"1"}]`.
+
+## API Documentation
+
+The OpenAPI specification is located in `backend/openapi.yml`.
+The endpoint compatibility status is in `backend/docs/compatibility.md`.
+
+### View with Swagger UI (local only)
+
+1. Make sure the backend is running (with Docker or `php artisan serve`). With Docker, it is exposed on `http://localhost:8000`.
+2. Start Swagger UI with the development override file:
+   ```shell
+   docker compose -f docker-compose.yml -f docker-compose.docs.yml up -d swagger-ui
+   ```
+3. Open `http://localhost:8081` in the browser. You should see the documentation loaded from `openapi.yml`.
+4. Test the verification endpoint `GET /__docs_dummy` to confirm connectivity.
+
+To stop Swagger UI:
+```shell
+docker compose -f docker-compose.yml -f docker-compose.docs.yml stop swagger-ui
+```
+
+Notes:
+- Swagger UI is not included in production deployments; it is only activated by combining the `docker-compose.docs.yml` file in local environments.

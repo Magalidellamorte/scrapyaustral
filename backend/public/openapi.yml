@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Scrapy API
+  version: 0.1.0
+  description: >-
+    Especificación inicial de la API para visualización en Swagger UI.
+    Esta especificación será extendida por los issues de la épica SCR-416.
+servers:
+  - url: http://localhost:8000/api
+    description: Entorno local (Docker / php artisan serve)
+paths:
+  /__docs_dummy:
+    get:
+      summary: Endpoint de verificación de la documentación
+      description: Endpoint mínimo para comprobar que Swagger UI carga y permite hacer llamadas.
+      tags:
+        - docs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+components:
+  schemas: {}
+
