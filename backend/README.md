@@ -123,3 +123,20 @@ Manual steps:
    curl -X GET http://127.0.0.1:8000/api/offer_types
    ```
    It should return `[{"id":1,"name":"Vender","enabled":"1"},{"id":2,"name":"Donar","enabled":"1"}]`.
+
+## API Documentation
+
+The OpenAPI specification is located at `public/openapi.yml`.
+See `docs/compatibility.md` for endpoint compatibility status.
+
+### View with Swagger UI
+
+1. Set `SWAGGER_ENABLED=true` in your `.env` or `.env.example`.
+2. Start the backend:
+   - With Docker: `docker-compose up --build -d`
+   - Or locally: `php artisan serve`
+3. Visit `http://localhost:8000/api/documentation` in your browser to access the interactive API docs.
+4. To disable the UI, set `SWAGGER_ENABLED=false` and reload.
+
+Notes:
+- Swagger UI is only available when `SWAGGER_ENABLED=true` and is not included in production deployments.

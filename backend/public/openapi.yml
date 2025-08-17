@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Scrapy API
+  version: 0.1.0
+  description: >-
+    Especificación inicial de la API para visualización en Swagger UI.
+    Esta especificación será extendida por los issues de la épica SCR-416.
+servers:
+  - url: http://localhost:8000/api
+    description: Entorno local (Docker / php artisan serve)
+paths:
+  /offer_types:
+    get:
+      summary: Lista de tipos de oferta
+      description: Devuelve la lista de tipos de oferta disponibles.
+      tags:
+        - offers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferType'
+              examples:
+                ejemplo:
+                  value:
+                    - id: 1
+                      name: Vender
+                      enabled: '1'
+                    - id: 2
+                      name: Donar
+                      enabled: '1'
+components:
+  schemas:
+    OfferType:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Vender
+        enabled:
+          type: string
+          description: Indicador de habilitación ("1" = habilitado)
+          example: '1'
+
