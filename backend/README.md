@@ -6,7 +6,7 @@
 * PHP v8.1
 * MySQL
 
-### Setup Local environment
+### Setup Local environment (Jump to "Docker" below instead if using it)
 
 1. Get Sources:
    ```shell
@@ -61,33 +61,62 @@
    ```shell
    php artisan migrate
    ```
-
-   Or for Docker:
-   ```shell
-   docker-compose exec app php artisan migrate
    ```
 10. Run seeds:
    ```shell
    php artisan db:seed
    ```
 
-   Or for Docker:
-   ```shell
-   docker-compose exec app php artisan db:seed
-   ```
 11. Generate Oauth keys:
     ```shell
     php artisan passport:install
     ```
 
-   Or for Docker:
+## Using Docker
+
+Docker automates:
+  - Installing PHP dependencies via Composer
+  - Creating the Database schema
+  - Generating the application key
+  - Fixing file permissions for `storage` and `bootstrap/cache`
+
+Manual steps:
+1. Clone the repository:
    ```shell
+   git clone https://github.com/Scrapyapp/api.git
+   cd api/backend
+   ```
+2. Copy `.env.example` to `.env` and update database settings:
+   ```shell
+   cp .env.example .env
+   ```
+   In `.env`, set:
+   ```dotenv
+   DB_HOST=db
+   DB_USERNAME=scrapy_admin
+   DB_PASSWORD=$$cr4pyR00t!
+   ```
+3. Configure `.env`. Minimal configuration:
+   ```dotenv
+   DB_HOST=db
+   DB_USERNAME="scrapy_admin"
+   DB_PASSWORD="passexample"
+   ```
+   IMPORTANT: keep the quotes; otherwise the seeding will fail because of permissions
+4. Build and start containers:
+   ```shell
+   docker-compose up --build -d
+   ```
+5. Migrate, seed the database and install Passport:
+   ```shell
+   docker-compose exec app php artisan migrate
+   docker-compose exec app php artisan db:seed
    docker-compose exec app php artisan passport:install
    ```
 
 ### Check local environment
 
-1. Run development server:
+1. Run development server (skip for Docker):
    ```shell
    php artisan serve
    ```
