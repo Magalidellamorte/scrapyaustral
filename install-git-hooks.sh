@@ -12,7 +12,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 echo ""
-echo -e "${BLUE}${BOLD}🔧 Installing Git Hooks for Laravel Backend...${RESET}"
+echo -e  "${BLUE}${BOLD}🔧 Installing Git Hooks for Laravel Backend...${RESET}"
 echo ""
 
 # Check if we're in a git repository
