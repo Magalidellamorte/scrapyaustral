@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER: scrapy
+    container_name: scrapy-app
+    restart: unless-stopped
+    working_dir: /var/www/scrapy
+    volumes:
+      - .:/var/www/scrapy
+    networks:
+      - scrapy
+
+  nginx:
+    image: nginx:1.21-alpine
+    container_name: scrapy-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/scrapy
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - scrapy
+
+  db:
+    image: mysql:8.0
+    container_name: scrapy-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - scrapy
+    ports:
+      - "3306:3306"
+
+networks:
+  scrapy:
+    driver: bridge
+volumes:
+  db_data:

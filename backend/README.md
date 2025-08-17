@@ -28,6 +28,9 @@
    ```
    USER = "scrapy_admin"
    PASS = "$cr4pyR00t!"
+
+   (In case of using Docker, escape as "$$cr4pyR00t!", 
+   because dollar sign will be interpreted as a variable)
    ```
 5. Create DB Admin User:
    ```sql
@@ -58,14 +61,29 @@
    ```shell
    php artisan migrate
    ```
+
+   Or for Docker:
+   ```shell
+   docker-compose exec app php artisan migrate
+   ```
 10. Run seeds:
    ```shell
    php artisan db:seed
+   ```
+
+   Or for Docker:
+   ```shell
+   docker-compose exec app php artisan db:seed
    ```
 11. Generate Oauth keys:
     ```shell
     php artisan passport:install
     ```
+
+   Or for Docker:
+   ```shell
+   docker-compose exec app php artisan passport:install
+   ```
 
 ### Check local environment
 
