@@ -28,9 +28,6 @@
    ```
    USER = "scrapy_admin"
    PASS = "$cr4pyR00t!"
-
-   (In case of using Docker, escape as "$$cr4pyR00t!", 
-   because dollar sign will be interpreted as a variable)
    ```
 5. Create DB Admin User:
    ```sql
