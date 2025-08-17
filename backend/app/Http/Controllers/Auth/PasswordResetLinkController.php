@@ -9,31 +9,40 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 
 class PasswordResetLinkController extends Controller
 {
+    /**
+     * Display the password reset link request view.
+     */
+    public function create()
+    {
+        return view('auth.forgot-password');
+    }
+
     public function store(Request $request): JsonResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        $user = User::where(['email' => $request->email])->first();
+        // We will send the password reset link to this user. Once we have attempted
+        // to send the link, we will examine the response then see the message we
+        // need to show to the user. Finally, we'll send out a proper response.
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-        if (!$user) {
+        if ($status == Password::RESET_LINK_SENT) {
             return response()->json([
                 'success' => true,
                 'message' => 'El código de reseteo fue enviado a tu correo electrónico.',
             ]);
         }
 
-        $token = Password::createToken($user);
-
-        SendEmail::dispatch(new ResetPasswordEmail($request->email, $token));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'El código de reseteo fue enviado a tu correo electrónico.',
+        throw ValidationException::withMessages([
+            'email' => [trans($status)],
         ]);
     }
 }
