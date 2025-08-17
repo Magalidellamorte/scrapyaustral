@@ -24,13 +24,20 @@ return (new PhpCsFixer\Config())
         'blank_line_before_statement' => [
             'statements' => ['return']
         ],
-        'braces' => [
-            'allow_single_line_closure' => true,
+        'single_space_around_construct' => true,
+        'control_structure_braces' => true,
+        'control_structure_continuation_position' => true,
+        'declare_parentheses' => true,
+        'no_multiple_statements_per_line' => true,
+        'braces_position' => [
+            'allow_single_line_anonymous_functions' => true,
         ],
+        'statement_indentation' => true,
         'cast_spaces' => true,
         'class_attributes_separation' => [
             'elements' => [
                 'method' => 'one',
+                'trait_import' => 'none',
             ]
         ],
         'class_definition' => true,
@@ -43,7 +50,7 @@ return (new PhpCsFixer\Config())
         'full_opening_tag' => true,
         'fully_qualified_strict_types' => true,
         'function_declaration' => true,
-        'function_typehint_space' => true,
+        'type_declaration_spaces' => true,
         'single_line_comment_style' => [
             'comment_types' => ['hash']
         ],
@@ -67,7 +74,6 @@ return (new PhpCsFixer\Config())
                 'extra',
                 'throw',
                 'use',
-                'use_trait',
             ]
         ],
         'no_blank_lines_after_class_opening' => true,
@@ -86,9 +92,8 @@ return (new PhpCsFixer\Config())
         'no_singleline_whitespace_before_semicolons' => true,
         'no_spaces_after_function_name' => true,
         'no_spaces_around_offset' => true,
-        'no_spaces_inside_parenthesis' => true,
-        'no_trailing_comma_in_list_call' => true,
-        'no_trailing_comma_in_singleline_array' => true,
+        'spaces_inside_parentheses' => false,
+        'no_trailing_comma_in_singleline' => true,
         'no_trailing_whitespace' => true,
         'no_trailing_whitespace_in_comment' => true,
         'no_unneeded_control_parentheses' => true,

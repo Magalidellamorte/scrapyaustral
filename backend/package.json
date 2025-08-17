@@ -7,7 +7,10 @@
         "watch-poll": "mix watch -- --watch-options-poll=1000",
         "hot": "mix watch --hot",
         "prod": "npm run production",
-        "production": "mix --production"
+        "production": "mix --production",
+        "format": "bash -c 'if [ ! -f php-cs-fixer ]; then curl -L https://cs.symfony.com/download/php-cs-fixer-v3.phar -o php-cs-fixer -s && chmod +x php-cs-fixer; fi && ./php-cs-fixer fix --config=.php-cs-fixer.dist.php'",
+        "format:check": "bash -c 'if [ ! -f php-cs-fixer ]; then curl -L https://cs.symfony.com/download/php-cs-fixer-v3.phar -o php-cs-fixer -s && chmod +x php-cs-fixer; fi && ./php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff'",
+        "format:commit": "npm run format && git add . && git commit -m \"style: apply PHP-CS-Fixer formatting fixes\""
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.2.1",

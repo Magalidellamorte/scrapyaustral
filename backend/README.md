@@ -134,3 +134,22 @@ See `docs/compatibility.md` for endpoint compatibility status.
 
 Notes:
 - Swagger UI is only available when `SWAGGER_ENABLED=true` and is not included in production deployments.
+
+
+# Usefull Commands
+
+#### Check what would be formatted (no changes)
+```shell
+cd backend
+npm run format:check
+```
+#### Fix all formatting issues
+```shell
+cd backend  
+npm run format
+```
+#### Format and commit in one command
+```shell
+cd backend
+npm run format:commit
+```
