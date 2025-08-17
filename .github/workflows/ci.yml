@@ -156,14 +156,6 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover coverage.xml
         working-directory: backend
 
-      # Upload coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: backend/coverage.xml
-          flags: backend
-          name: backend-coverage
-
   # ========================
   # Docker Container Tests
   # ========================
