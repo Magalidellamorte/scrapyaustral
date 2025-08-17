@@ -1,0 +1,286 @@
+name: CI Pipeline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # ========================
+  # PHP Code Quality & Tests
+  # ========================
+  php-quality:
+    runs-on: ubuntu-latest
+    name: PHP Code Quality & Tests
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: scrapy_test
+          MYSQL_USER: scrapy_test
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, mysql, pdo_mysql
+          coverage: xdebug
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      # Install PHP dependencies with caching
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: backend
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
+        working-directory: backend
+
+      # Install Node.js dependencies
+      - name: Install Node.js dependencies
+        run: npm ci
+        working-directory: backend
+
+      # Prepare Laravel environment
+      - name: Copy environment file
+        run: cp .env.example .env
+        working-directory: backend
+
+      - name: Generate application key
+        run: php artisan key:generate
+        working-directory: backend
+
+      - name: Set testing environment
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=scrapy_test" >> .env
+          echo "DB_USERNAME=scrapy_test" >> .env
+          echo "DB_PASSWORD=password" >> .env
+        working-directory: backend
+
+      # Run PHP linting and formatting checks
+      - name: Install PHP CS Fixer
+        run: composer require --dev friendsofphp/php-cs-fixer
+        working-directory: backend
+
+      - name: Run PHP CS Fixer (dry-run)
+        run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff --verbose
+        working-directory: backend
+
+      - name: Install PHPStan
+        run: composer require --dev phpstan/phpstan larastan/larastan
+        working-directory: backend
+
+      - name: Run PHPStan analysis
+        run: vendor/bin/phpstan analyse --memory-limit=2G
+        working-directory: backend
+
+      # Laravel compilation checks
+      - name: Clear and cache config
+        run: |
+          php artisan config:clear
+          php artisan config:cache
+        working-directory: backend
+
+      - name: Clear and cache routes
+        run: |
+          php artisan route:clear
+          php artisan route:cache
+        working-directory: backend
+
+      - name: Clear and cache views
+        run: |
+          php artisan view:clear
+          php artisan view:cache
+        working-directory: backend
+
+      - name: Compile assets
+        run: npm run production
+        working-directory: backend
+
+      # Database migration and seeding
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P3306 -uscrapy_test -ppassword --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+        
+      - name: Run database migrations
+        run: php artisan migrate --force
+        working-directory: backend
+
+      - name: Install Passport
+        run: php artisan passport:install --force
+        working-directory: backend
+
+      # Run tests
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+        working-directory: backend
+
+      # Upload coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  # ========================
+  # Docker Container Tests
+  # ========================
+  docker-tests:
+    runs-on: ubuntu-latest
+    name: Docker Container Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Copy environment file
+        run: cp .env.example .env
+        working-directory: backend
+
+      - name: Configure environment for Docker
+        run: |
+          echo "DB_HOST=db" >> .env
+          echo "DB_USERNAME=scrapy_admin" >> .env
+          echo "DB_PASSWORD=testpassword123" >> .env
+          echo "DB_DATABASE=scrapy" >> .env
+        working-directory: backend
+
+      # Build and test Docker containers
+      - name: Build Docker containers
+        run: docker-compose build
+        working-directory: backend
+
+      - name: Start Docker containers
+        run: docker-compose up -d
+        working-directory: backend
+
+      - name: Wait for containers to be healthy
+        run: |
+          echo "Waiting for containers to start..."
+          sleep 30
+          docker-compose logs app
+          docker-compose ps
+
+      - name: Check container status
+        run: |
+          if [ "$(docker-compose ps -q app | wc -l)" -eq 0 ]; then
+            echo "App container is not running"
+            exit 1
+          fi
+          if [ "$(docker-compose ps -q db | wc -l)" -eq 0 ]; then
+            echo "Database container is not running"
+            exit 1
+          fi
+          if [ "$(docker-compose ps -q nginx | wc -l)" -eq 0 ]; then
+            echo "Nginx container is not running"
+            exit 1
+          fi
+        working-directory: backend
+
+      - name: Test application response
+        run: |
+          # Wait for the application to be ready
+          sleep 10
+          # Test if the application responds
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/)
+          if [ "$response" -ne 200 ]; then
+            echo "Application not responding correctly (HTTP $response)"
+            docker-compose logs app
+            exit 1
+          fi
+          echo "Application is responding correctly (HTTP $response)"
+        working-directory: backend
+
+      - name: Run database setup in container
+        run: |
+          docker-compose exec -T app php artisan migrate --force
+          docker-compose exec -T app php artisan db:seed --force
+          docker-compose exec -T app php artisan passport:install --force
+        working-directory: backend
+
+      - name: Test API endpoint
+        run: |
+          sleep 5
+          response=$(curl -s http://localhost:8000/api/offer_types)
+          echo "API Response: $response"
+          # Check if response contains expected data
+          if [[ $response == *"Vender"* ]] && [[ $response == *"Donar"* ]]; then
+            echo "API endpoint test passed"
+          else
+            echo "API endpoint test failed"
+            exit 1
+          fi
+        working-directory: backend
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose down -v
+        working-directory: backend
+
+  # ========================
+  # Code Security Analysis
+  # ========================
+  security:
+    runs-on: ubuntu-latest
+    name: Security Analysis
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+
+      - name: Install PHP dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        working-directory: backend
+
+      # Security audit
+      - name: Run security audit
+        run: composer audit
+        working-directory: backend
+
+      # Check for known vulnerabilities
+      - name: Install security checker
+        run: composer require --dev enlightn/security-checker
+        working-directory: backend
+
+      - name: Run security check
+        run: vendor/bin/security-checker security:check composer.lock
+        working-directory: backend
