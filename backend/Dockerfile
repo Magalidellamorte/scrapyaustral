@@ -1,6 +1,6 @@
 ARG USER
 
-FROM php:8.1-fpm-alpine
+FROM php:8.3-fpm-alpine
 
 # Development tools
 RUN apk add --no-cache openssl bash mysql-client nodejs npm
