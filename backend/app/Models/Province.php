@@ -27,7 +27,7 @@ class Province extends Model
         return $query->has('address');
     }
 
-    public function createOrGet($request)
+    public static function createOrGet($request)
     {
         $province = empty($request['address']['province']) ? '' : $request['address']['province'];
         if (!$province) {

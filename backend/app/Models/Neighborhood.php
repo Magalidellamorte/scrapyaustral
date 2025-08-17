@@ -29,7 +29,7 @@ class Neighborhood extends Model
         return $query->has('address');
     }
 
-    public function createOrGet($request)
+    public static function createOrGet($request)
     {
         $neighborhood = empty($request['address']['neighborhood']) ? '' : $request['address']['neighborhood'];
         if (!$neighborhood) {

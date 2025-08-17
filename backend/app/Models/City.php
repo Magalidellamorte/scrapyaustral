@@ -34,7 +34,7 @@ class City extends Model
         return $query->has('address');
     }
 
-    public function createOrGet($request)
+    public static function createOrGet($request)
     {
         $city = empty($request['address']['city']) ? '' : $request['address']['city'];
         if (!$city) {
