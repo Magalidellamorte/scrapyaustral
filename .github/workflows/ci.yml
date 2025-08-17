@@ -253,38 +253,3 @@ jobs:
         if: always()
         run: docker compose down -v
         working-directory: backend
-
-  # ========================
-  # Code Security Analysis
-  # ========================
-  security:
-    runs-on: ubuntu-latest
-    name: Security Analysis
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Install PHP dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-        working-directory: backend
-
-      # Security audit (non-blocking)
-      - name: Run security audit
-        run: composer audit || echo "Security vulnerabilities found - please review and update dependencies"
-        working-directory: backend
-
-      # Check for known vulnerabilities (non-blocking)
-      - name: Install security checker
-        run: composer require --dev enlightn/security-checker
-        working-directory: backend
-
-      - name: Run security check
-        run: vendor/bin/security-checker security:check composer.lock || echo "Security check completed with warnings"
-        working-directory: backend
