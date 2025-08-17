@@ -33,9 +33,25 @@ class User extends Authenticatable implements CanResetPasswordContract
      * @var string[]
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'phone',
         'email',
         'password',
+        'admin',
+        'scraper',
+        'profile_picture_path',
+        'document_picture_front_path',
+        'document_picture_back_path',
+        'fiscal_id',
+        'description',
+        'player_id',
+        'enabled',
+        'coverage_range',
+        'company_title',
+        'whatsapp',
+        'is_store',
+        'type',
     ];
 
     /**

@@ -9,65 +9,68 @@
 ### Setup Local environment (Jump to "Docker" below instead if using it)
 
 1. Get Sources:
-   ```shell
-   git clone https://github.com/Scrapyapp/api.git
-   cd api
-   ```
+```shell
+git clone https://github.com/Scrapyapp/api.git
+cd api
+```
 2. Install dependencies:
-   ```shell
-   composer install
-   ```
+```shell
+composer install
+```
 3. Create a new MySQL DB Schema:
-   ```sql
-   CREATE
-       SCHEMA `scrapy`
-       CHARACTER SET utf8mb4
-       COLLATE utf8mb4_unicode_ci;
-   ```
+```sql
+CREATE
+      SCHEMA `scrapy`
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci;
+```
 4. Define a DB Admin User:
-   ```
-   USER = "scrapy_admin"
-   PASS = "$cr4pyR00t!"
-   ```
+```
+USER = "scrapy_admin"
+PASS = "$cr4pyR00t!"
+```
 5. Create DB Admin User:
-   ```sql
-   CREATE
-       USER 'scrapy_admin'@'localhost'
-       IDENTIFIED BY '$cr4pyR00t!';
-   GRANT
-       ALL PRIVILEGES
-       ON scrapy.*
-       TO 'scrapy_admin'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
+```sql
+CREATE
+      USER 'scrapy_admin'@'localhost'
+      IDENTIFIED BY '$cr4pyR00t!';
+GRANT
+      ALL PRIVILEGES
+      ON scrapy.*
+      TO 'scrapy_admin'@'localhost';
+FLUSH PRIVILEGES;
+```
 6. Copy `.env.example` to `.env`:
-   ```shell
-   cp .env.example .env
-   ```
+```shell
+cp .env.example .env
+```
 7. Configure `.env`. Minimal configuration:
-   ```dotenv
-   DB_HOST=localhost
-   DB_USERNAME=scrapy_admin
-   DB_PASSWORD=$cr4pyR00t!
-   ```
+```dotenv
+DB_HOST=localhost
+DB_USERNAME=scrapy_admin
+DB_PASSWORD=$cr4pyR00t!
+```
 8. Generate App Key:
-   ```shell
-   php artisan key:generate
-   ```
+```shell
+php artisan key:generate
+```
 9. Migrate DB:
-   ```shell
-   php artisan migrate
-   ```
-   ```
+```shell
+php artisan migrate
+```
 10. Run seeds:
-   ```shell
-   php artisan db:seed
-   ```
+```shell
+php artisan db:seed
+```
 
 11. Generate Oauth keys:
-    ```shell
-    php artisan passport:install
-    ```
+```shell
+php artisan passport:install
+```
+12. Setup Githooks
+```shell
+./install-git-hooks.sh
+ ```
 
 ## Using Docker
 
@@ -104,6 +107,11 @@ Manual steps:
    docker-compose exec app php artisan db:seed
    docker-compose exec app php artisan passport:install
    ```
+
+6. Setup Githooks
+```shell
+./install-git-hooks.sh
+ ```
 
 ### Check local environment
 

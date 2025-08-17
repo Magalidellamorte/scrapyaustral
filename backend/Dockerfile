@@ -2,8 +2,9 @@ ARG USER
 
 FROM php:8.3-fpm-alpine
 
-# Development tools
-RUN apk add --no-cache openssl bash mysql-client nodejs npm
+# Development tools and system dependencies
+RUN apk add --no-cache openssl bash mysql-client nodejs npm \
+    linux-headers
 
 # PHP Extensions
 RUN docker-php-ext-install pdo pdo_mysql sockets
