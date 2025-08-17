@@ -172,10 +172,21 @@ jobs:
 
       - name: Configure environment for Docker
         run: |
+          echo "APP_NAME=Scrapy" >> .env
+          echo "APP_ENV=testing" >> .env
+          echo "APP_DEBUG=true" >> .env
+          echo "APP_URL=http://localhost:8000" >> .env
+          echo "" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
           echo "DB_HOST=db" >> .env
-          echo "DB_USERNAME=scrapy_admin" >> .env
-          echo "DB_PASSWORD=testpassword123" >> .env
+          echo "DB_PORT=3306" >> .env
           echo "DB_DATABASE=scrapy" >> .env
+          echo "DB_USERNAME=scrapy_admin" >> .env  
+          echo "DB_PASSWORD=testpassword123" >> .env
+          echo "" >> .env
+          echo "CACHE_DRIVER=array" >> .env
+          echo "SESSION_DRIVER=array" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
         working-directory: backend
 
       # Build and test Docker containers
@@ -190,28 +201,44 @@ jobs:
       - name: Start Docker containers
         run: docker compose up -d
         working-directory: backend
+        env:
+          DB_USERNAME: "scrapy_admin"
+          DB_PASSWORD: "testpassword123"
+          DB_DATABASE: "scrapy"
 
       - name: Wait for containers to be healthy
         run: |
           echo "Waiting for containers to start..."
-          sleep 30
-          docker compose logs app
-          docker compose ps
+          echo "Checking container status..."
+          for i in {1..12}; do
+            echo "Attempt $i/12..."
+            docker compose ps
+            if docker compose ps | grep -q "Up"; then
+              echo "Some containers are running"
+              docker compose logs --tail=20 app
+              break
+            fi
+            echo "Waiting 10 more seconds..."
+            sleep 10
+          done
+        working-directory: backend
 
       - name: Check container status
         run: |
-          if [ "$(docker compose ps -q app | wc -l)" -eq 0 ]; then
-            echo "App container is not running"
+          echo "=== Final container status check ==="
+          docker compose ps
+          
+          # Check if containers are running
+          if ! docker compose ps | grep -q "Up"; then
+            echo "ERROR: No containers are running"
+            echo "=== Container logs ==="
+            docker compose logs app
+            docker compose logs db  
+            docker compose logs nginx
             exit 1
           fi
-          if [ "$(docker compose ps -q db | wc -l)" -eq 0 ]; then
-            echo "Database container is not running"
-            exit 1
-          fi
-          if [ "$(docker compose ps -q nginx | wc -l)" -eq 0 ]; then
-            echo "Nginx container is not running"
-            exit 1
-          fi
+          
+          echo "Containers are running successfully!"
         working-directory: backend
 
       - name: Test application response

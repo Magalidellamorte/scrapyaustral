@@ -44,7 +44,9 @@ return (new PhpCsFixer\Config())
         'fully_qualified_strict_types' => true,
         'function_declaration' => true,
         'function_typehint_space' => true,
-        'hash_to_slash_comment' => true,
+        'single_line_comment_style' => [
+            'comment_types' => ['hash']
+        ],
         'heredoc_to_nowdoc' => true,
         'include' => true,
         'increment_style' => ['style' => 'post'],
@@ -100,7 +102,6 @@ return (new PhpCsFixer\Config())
         'phpdoc_align' => true,
         'phpdoc_annotation_without_dot' => true,
         'phpdoc_indent' => true,
-        'general_phpdoc_tag_rename' => true,
         'phpdoc_inline_tag_normalizer' => true,
         'phpdoc_tag_type' => true,
         'phpdoc_no_access' => true,
@@ -113,7 +114,7 @@ return (new PhpCsFixer\Config())
         'phpdoc_separation' => true,
         'phpdoc_single_line_var_spacing' => true,
         'phpdoc_summary' => true,
-        'phpdoc_tag_casing' => true,
+        'phpdoc_tag_casing' => ['tags' => ['inheritdoc' => 'inheritDoc']],
         'phpdoc_to_comment' => true,
         'phpdoc_trim' => true,
         'phpdoc_types' => true,
