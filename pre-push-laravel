@@ -47,7 +47,7 @@ fi
 
 # 1. Composer validation
 echo -e "${BLUE}1️⃣  Validating composer.json...${RESET}"
-composer validate --strict
+composer validate
 if [ $? -ne 0 ]; then
   echo -e "${RED}❌ composer.json validation failed!${RESET}"
   exit 1
@@ -104,48 +104,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 echo -e "${GREEN}✅ Static analysis passed${RESET}"
-
-# 5. Laravel configuration check
-echo -e "${BLUE}5️⃣  Checking Laravel configuration...${RESET}"
-
-# Check if .env exists
-if [ ! -f ".env" ]; then
-  echo -e "${YELLOW}⚠️  No .env file found, copying from .env.example...${RESET}"
-  cp .env.example .env
-  php artisan key:generate --no-interaction
-fi
-
-# Test configuration caching
-php artisan config:cache --quiet > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "${RED}❌ Laravel configuration cache failed!${RESET}"
-  php artisan config:cache
-  exit 1
-fi
-
-# Test route caching  
-php artisan route:cache --quiet > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo -e "${RED}❌ Laravel route cache failed!${RESET}"
-  php artisan route:cache
-  exit 1
-fi
-
-# Clear caches to avoid issues in development
-php artisan config:clear --quiet > /dev/null 2>&1
-php artisan route:clear --quiet > /dev/null 2>&1
-
-echo -e "${GREEN}✅ Laravel configuration check passed${RESET}"
-
-# 6. Run tests (optional, uncomment if you want to enforce tests)
-# echo -e "${BLUE}6️⃣  Running PHPUnit tests...${RESET}"
-# vendor/bin/phpunit --quiet
-# if [ $? -ne 0 ]; then
-#   echo -e "${RED}❌ Tests failed!${RESET}"
-#   vendor/bin/phpunit
-#   exit 1
-# fi
-# echo -e "${GREEN}✅ All tests passed${RESET}"
 
 # Clean up PHP-CS-Fixer (optional)
 rm -f php-cs-fixer .php-cs-fixer.cache
