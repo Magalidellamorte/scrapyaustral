@@ -1,5 +1,7 @@
 ## Compatibilidad por endpoint (SCR-416)
 
+Describe la compatibilidad de los endpoints con la Web del Marketplace.
+
 El estado debe ser una de estas opciones:
 
 1. Usar Como Está (**As-Is**): No requiere cambios, pudiendo usarse de forma directa o con cierta manipulación de los datos. En definitiva, toda la información se encuentra disponible.

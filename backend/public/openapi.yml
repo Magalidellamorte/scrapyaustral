@@ -9,23 +9,43 @@ servers:
   - url: http://localhost:8000/api
     description: Entorno local (Docker / php artisan serve)
 paths:
-  /__docs_dummy:
+  /offer_types:
     get:
-      summary: Endpoint de verificación de la documentación
-      description: Endpoint mínimo para comprobar que Swagger UI carga y permite hacer llamadas.
+      summary: Lista de tipos de oferta
+      description: Devuelve la lista de tipos de oferta disponibles.
       tags:
-        - docs
+        - offers
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferType'
+              examples:
+                ejemplo:
+                  value:
+                    - id: 1
+                      name: Vender
+                      enabled: '1'
+                    - id: 2
+                      name: Donar
+                      enabled: '1'
 components:
-  schemas: {}
+  schemas:
+    OfferType:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Vender
+        enabled:
+          type: string
+          description: Indicador de habilitación ("1" = habilitado)
+          example: '1'
 

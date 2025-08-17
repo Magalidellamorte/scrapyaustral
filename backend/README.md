@@ -129,23 +129,17 @@ Manual steps:
 
 ## API Documentation
 
-The OpenAPI specification is located in `backend/openapi.yml`.
-The endpoint compatibility status is in `backend/docs/compatibility.md`.
+The OpenAPI specification is located at `public/openapi.yml`.
+See `docs/compatibility.md` for endpoint compatibility status.
 
-### View with Swagger UI (local only)
+### View with Swagger UI
 
-1. Make sure the backend is running (with Docker or `php artisan serve`). With Docker, it is exposed on `http://localhost:8000`.
-2. Start Swagger UI with the development override file:
-   ```shell
-   docker compose -f docker-compose.yml -f docker-compose.docs.yml up -d swagger-ui
-   ```
-3. Open `http://localhost:8081` in the browser. You should see the documentation loaded from `openapi.yml`.
-4. Test the verification endpoint `GET /__docs_dummy` to confirm connectivity.
-
-To stop Swagger UI:
-```shell
-docker compose -f docker-compose.yml -f docker-compose.docs.yml stop swagger-ui
-```
+1. Set `SWAGGER_ENABLED=true` in your `.env` or `.env.example`.
+2. Start the backend:
+   - With Docker: `docker-compose up --build -d`
+   - Or locally: `php artisan serve`
+3. Visit `http://localhost:8000/api/documentation` in your browser to access the interactive API docs.
+4. To disable the UI, set `SWAGGER_ENABLED=false` and reload.
 
 Notes:
-- Swagger UI is not included in production deployments; it is only activated by combining the `docker-compose.docs.yml` file in local environments.
+- Swagger UI is only available when `SWAGGER_ENABLED=true` and is not included in production deployments.
