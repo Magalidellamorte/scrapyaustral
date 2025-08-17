@@ -11,7 +11,6 @@ class AddCloseReasionColumnToPostulation extends Migration
     {
         Schema::table('postulations', function (Blueprint $table) {
             $table->foreignIdFor(ClosePostulationReason::class)->nullable();
-
         });
     }
 

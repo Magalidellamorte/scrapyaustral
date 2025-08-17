@@ -14,7 +14,7 @@ class SubzoneController extends Controller
         $per_page = $validated['per_page'] ?? 10;
 
         $user = auth()->user();
-        $subZones = Subzone::whereHas('zone', function ($query) use ($user) {
+        $subZones = SubZone::whereHas('zone', function ($query) use ($user) {
             $query->where('localidad_id', $user->localidad_id);
         })->paginate($per_page);
 
@@ -30,6 +30,7 @@ class SubzoneController extends Controller
 
         $schedules = $subZone->schedules()
             ->paginate($per_page);
+
         return response()->json($schedules);
     }
 
@@ -38,6 +39,7 @@ class SubzoneController extends Controller
         $this->authorize('view', $subZone);
 
         $polygon = $subZone->polygon()->with('polygonPoints')->first();
+
         return response()->json($polygon);
     }
 }

@@ -26,7 +26,6 @@ class CreateOfferHogarRequest extends FormRequest
      */
     public function rules()
     {
-
         return [
             'address.street' => 'required|max:255',
             'address.street_number' => 'required|max:255',

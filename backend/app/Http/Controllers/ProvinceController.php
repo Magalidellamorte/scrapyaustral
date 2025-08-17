@@ -14,7 +14,7 @@ class ProvinceController extends Controller
 
         $provinces = Province::query();
 
-        if (! in_array('unused', $includes)) {
+        if (!in_array('unused', $includes)) {
             $provinces->used();
         }
 

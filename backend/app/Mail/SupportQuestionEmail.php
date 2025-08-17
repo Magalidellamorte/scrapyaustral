@@ -4,9 +4,9 @@ namespace App\Mail;
 
 use App\Models\Support;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 class SupportQuestionEmail extends Mailable
 {
@@ -17,7 +17,7 @@ class SupportQuestionEmail extends Mailable
 
     private $support;
 
-    public function __construct(Authenticatable $user,  Support $support)
+    public function __construct(Authenticatable $user, Support $support)
     {
         $this->user = $user;
         $this->support = $support;

@@ -16,13 +16,13 @@ use App\Http\Controllers\NeighborhoodController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\OfferStatusController;
+use App\Http\Controllers\OfferTorkyController;
 use App\Http\Controllers\OfferTypeController;
 use App\Http\Controllers\PostulationController;
 use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\SubzoneController;
 use App\Http\Controllers\SupportController;
-use App\Http\Controllers\OfferTorkyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\ZoneScheduleController;
@@ -33,7 +33,7 @@ Route::get('__docs_dummy', function () {
 });
 
 Route::group([
-    'prefix' => 'auth'
+    'prefix' => 'auth',
 ], function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
@@ -43,7 +43,7 @@ Route::group([
     Route::post('reset-password', [NewPasswordController::class, 'store']);
 
     Route::group([
-        'middleware' => 'auth:api'
+        'middleware' => 'auth:api',
     ], function () {
         Route::get('logout', [AuthController::class, 'logout']);
         Route::get('user', [AuthController::class, 'user']);
@@ -53,14 +53,13 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => 'auth:api'
+    'middleware' => 'auth:api',
 ], function () {
     Route::post('upgrade', [AuthController::class, 'upgrade']);
     Route::post('expoTokenPush', [AuthController::class, 'expoTokenPush']);
     Route::post('validate', [AuthController::class, 'account_validate']);
     Route::post('update_profile', [AuthController::class, 'update_profile']);
     Route::post('subscription', [AuthController::class, 'subscription']);
-
 
     Route::post('torkies/{torky}/start', [OfferTorkyController::class, 'start']);
     Route::post('torkies/{torky}/end', [OfferTorkyController::class, 'end']);
@@ -124,7 +123,7 @@ Route::middleware(['auth:api', 'admin_localidad'])
         Route::delete('/zones/{zone}', [ZoneController::class, 'destroy']);
 
         // SubZones.
-        Route::get('/subzones', [SubZoneController::class, 'index']);
+        Route::get('/subzones', [SubzoneController::class, 'index']);
         Route::get('/zones/{zone}/subzones', [ZoneController::class, 'subzones']);
 
         // Schedules.
@@ -133,9 +132,9 @@ Route::middleware(['auth:api', 'admin_localidad'])
         Route::get('/schedules/{zoneSchedule}', [ZoneScheduleController::class, 'show']);
         Route::put('/schedules/{zoneSchedule}', [ZoneScheduleController::class, 'update']);
         Route::delete('/schedules/{zoneSchedule}', [ZoneScheduleController::class, 'destroy']);
-        Route::get('/subzones/{subZone}/schedules', [SubZoneController::class, 'schedules']);
+        Route::get('/subzones/{subZone}/schedules', [SubzoneController::class, 'schedules']);
 
         // Polygons.
         Route::get('/zones/{zone}/polygon', [ZoneController::class, 'polygon']);
-        Route::get('/subzones/{subZone}/polygon', [SubZoneController::class, 'polygon']);
+        Route::get('/subzones/{subZone}/polygon', [SubzoneController::class, 'polygon']);
     });

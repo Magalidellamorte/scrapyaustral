@@ -32,6 +32,7 @@ class ZoneController extends Controller
 
         $subZones = $zone->subZones()
             ->paginate($per_page);
+
         return response()->json($subZones);
     }
 
@@ -44,6 +45,7 @@ class ZoneController extends Controller
 
         $schedules = $zone->schedules()
             ->paginate($per_page);
+
         return response()->json($schedules);
     }
 
@@ -52,6 +54,7 @@ class ZoneController extends Controller
         $this->authorize('view', $zone);
 
         $polygon = $zone->polygon()->with('polygonPoints')->first();
+
         return response()->json($polygon);
     }
 
@@ -59,6 +62,7 @@ class ZoneController extends Controller
     {
         $this->authorize('view', $zone);
         $zone->load(['polygon.polygonPoints']);
+
         return response()->json($zone);
     }
 
@@ -108,11 +112,11 @@ class ZoneController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Zona creada correctamente.',
-                'data' => $zone->load('polygon.polygonPoints')
+                'data' => $zone->load('polygon.polygonPoints'),
             ], 201);
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear la Zona.',

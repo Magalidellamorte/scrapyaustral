@@ -12,10 +12,6 @@ class SubZonePolicy
 
     /**
      * Determine whether the user can view the model.
-     *
-     * @param User $user
-     * @param SubZone $subZone
-     * @return bool
      */
     public function view(User $user, SubZone $subZone): bool
     {

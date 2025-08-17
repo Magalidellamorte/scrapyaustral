@@ -1,9 +1,9 @@
 <?php
 
+use App\Models\Category;
 use App\Models\ClientType;
 use App\Models\Condition;
 use App\Models\MeasureType;
-use App\Models\Category;
 use App\Models\OfferStatus;
 use App\Models\OfferType;
 use App\Models\User;
@@ -15,8 +15,6 @@ class CreateOffersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -45,8 +43,6 @@ class CreateOffersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {

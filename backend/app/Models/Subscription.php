@@ -25,12 +25,12 @@ class Subscription extends Model
 
     protected $casts = [
         'ends_at' => 'datetime',
-        'trial_ends_at' => 'datetime'
+        'trial_ends_at' => 'datetime',
     ];
 
     protected $with = [
         'plan',
-        'invoices'
+        'invoices',
     ];
 
     public function user(): BelongsTo
@@ -48,11 +48,13 @@ class Subscription extends Model
         return $this->hasMany(Invoice::class, 'subscription_id', 'id');
     }
 
-    public function scopeIsNotEnded($query) {
+    public function scopeIsNotEnded($query)
+    {
         return $query->where('ends_at', '>=', Carbon::today());
     }
 
-    public function scopeIsNotCancelled($query) {
+    public function scopeIsNotCancelled($query)
+    {
         return $query->where('canceled_at', null);
     }
 

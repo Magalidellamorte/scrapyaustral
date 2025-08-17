@@ -11,8 +11,9 @@ class InvoiceController extends Controller
     public function index(): JsonResponse
     {
         return response()
-            ->json(Invoice::with('subscription')->where('user_id', auth()->user()->id)->orderBy('id','DESC')->get());
+            ->json(Invoice::with('subscription')->where('user_id', auth()->user()->id)->orderBy('id', 'DESC')->get());
     }
+
     public function plans(): JsonResponse
     {
         return response()

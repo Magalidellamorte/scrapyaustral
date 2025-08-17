@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Province extends Model
 {
-    public $timestamps = false;
     use HasFactory;
+    public $timestamps = false;
 
     public function cities(): HasMany
     {
@@ -30,15 +30,18 @@ class Province extends Model
     public function createOrGet($request)
     {
         $province = empty($request['address']['province']) ? '' : $request['address']['province'];
-        if(!$province) return;
-        $get=Province::where('name',$province)->first();
-        if($get)
+        if (!$province) {
+            return;
+        }
+        $get = self::where('name', $province)->first();
+        if ($get) {
             return $get->id;
+        }
 
-        $new=new Province();
-        $new->name=$province;
+        $new = new self();
+        $new->name = $province;
         $new->save();
-        
+
         return $new->id;
     }
 }

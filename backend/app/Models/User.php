@@ -16,11 +16,14 @@ use Laravel\Passport\HasApiTokens;
 
 /**
  * @property string $type
- * @property int $localidad_id
+ * @property int    $localidad_id
  */
 class User extends Authenticatable implements CanResetPasswordContract
 {
-    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
+    use CanResetPassword;
 
     public const STORAGE_PATH = 'images/users/';
 
@@ -54,9 +57,9 @@ class User extends Authenticatable implements CanResetPasswordContract
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = array(
-        'full_name'
-    );
+    protected $appends = [
+        'full_name',
+    ];
 
     protected $with = [
         'availabilities',
@@ -69,10 +72,11 @@ class User extends Authenticatable implements CanResetPasswordContract
 
     public function getFullNameAttribute()
     {
-        if ($this->is_company && $this->company_title)
+        if ($this->is_company && $this->company_title) {
             return $this->company_title;
-        else
+        } else {
             return $this->first_name . ' ' . $this->last_name;
+        }
     }
 
     public function address(): MorphOne
@@ -130,7 +134,7 @@ class User extends Authenticatable implements CanResetPasswordContract
 
     public function isAdminLocalidad(): bool
     {
-        return $this->type === 'admin_localidad';
+        return 'admin_localidad' === $this->type;
     }
 
     public function localidad(): BelongsTo

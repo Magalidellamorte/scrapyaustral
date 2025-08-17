@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Province;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Province;
 
 class City extends Model
 {
-    public $timestamps = false;
     use HasFactory;
+    public $timestamps = false;
 
     public function neighborhoods(): HasMany
     {
@@ -37,17 +37,20 @@ class City extends Model
     public function createOrGet($request)
     {
         $city = empty($request['address']['city']) ? '' : $request['address']['city'];
-        if(!$city) return;
+        if (!$city) {
+            return;
+        }
 
-        $get=City::where('name',$city)->first();
-        if($get)
+        $get = self::where('name', $city)->first();
+        if ($get) {
             return $get->id;
+        }
 
-        $new=new City();
-        $new->name=$city;
-        $new->province_id=Province::createOrget($request);
+        $new = new self();
+        $new->name = $city;
+        $new->province_id = Province::createOrget($request);
         $new->save();
-        
+
         return $new->id;
     }
 }

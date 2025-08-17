@@ -30,16 +30,16 @@ class NewPasswordController extends Controller
             }
         );
 
-        if($status !== Password::PASSWORD_RESET) {
+        if (Password::PASSWORD_RESET !== $status) {
             return response()->json([
                 'success' => false,
-                'messsage' => 'Hubo un problema al actualizar tu contraseña'
+                'messsage' => 'Hubo un problema al actualizar tu contraseña',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         return response()->json([
             'success' => true,
-            'messsage' => 'Tu contraseña fue actualizada correctamente'
+            'messsage' => 'Tu contraseña fue actualizada correctamente',
         ]);
     }
 }

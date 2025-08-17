@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @property Zone $zone
+ * @property Zone    $zone
  * @property Polygon $polygon
  */
 class SubZone extends Model

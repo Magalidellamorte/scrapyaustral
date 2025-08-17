@@ -118,5 +118,5 @@ return [
     'support' => [
         'address' => env('MAIL_SUPPORT_ADDRESS', 'support@example.com'),
         'name' => env('MAIL_SUPPORT_NAME', 'Soporte'),
-    ]
+    ],
 ];

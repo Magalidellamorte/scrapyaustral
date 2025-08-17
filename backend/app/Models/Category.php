@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Scope;
 
 class EnabledScope implements Scope
@@ -20,7 +20,8 @@ class Category extends Model
 {
     use HasFactory;
 
-    public function users(): BelongsToMany {
+    public function users(): BelongsToMany
+    {
         return $this->belongsToMany(User::class);
     }
 
@@ -31,9 +32,8 @@ class Category extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope(new EnabledScope);
+        static::addGlobalScope(new EnabledScope());
     }
-
 
     public function offers()
     {

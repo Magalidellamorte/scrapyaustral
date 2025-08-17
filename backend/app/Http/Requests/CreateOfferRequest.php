@@ -26,7 +26,6 @@ class CreateOfferRequest extends FormRequest
      */
     public function rules()
     {
-
         return [
             'offer_type_id' => 'required|exists:offer_types,id',
             'client_type_id' => 'sometimes|exists:client_types,id',
@@ -45,7 +44,7 @@ class CreateOfferRequest extends FormRequest
             'address.postal_code' => 'max:255',
             'address.floor' => 'sometimes|max:255',
             'address.apartment' => 'sometimes|max:255',
-      
+
         ];
     }
 }

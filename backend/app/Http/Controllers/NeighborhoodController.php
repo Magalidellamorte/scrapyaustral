@@ -15,7 +15,7 @@ class NeighborhoodController extends Controller
 
         $cities = Neighborhood::where('city_id', $city->id);
 
-        if (! in_array('unused', $includes)) {
+        if (!in_array('unused', $includes)) {
             $cities->used();
         }
 

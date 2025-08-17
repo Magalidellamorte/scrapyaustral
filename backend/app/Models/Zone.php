@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @property int $localidad_id
- * @property Polygon $polygon
+ * @property int                 $localidad_id
+ * @property Polygon             $polygon
  * @property Collection<SubZone> $subZones
  */
 class Zone extends Model

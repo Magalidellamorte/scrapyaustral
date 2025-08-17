@@ -18,7 +18,7 @@ class ChatMessage extends Model
         'offer_id',
         'text',
         'automatic',
-        'highlighted'
+        'highlighted',
     ];
 
     public function offer(): BelongsTo

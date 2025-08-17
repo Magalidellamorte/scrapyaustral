@@ -8,45 +8,45 @@ class PostulationFilter extends ModelFilter
 {
     public $relations = [];
 
-    public function own($own): PostulationFilter
+    public function own($own): self
     {
         $userId = auth()->user()->id;
 
-        if($own === 'true' || $own === true) {
+        if ('true' === $own || true === $own) {
             return $this->where('user_id', $userId);
         }
 
-        if($own == 'false' || $own === false) {
+        if ('false' == $own || false === $own) {
             return $this->where('user_id', '!=', $userId);
         }
 
         return $this;
     }
 
-    public function offerTypes($types): PostulationFilter
+    public function offerTypes($types): self
     {
-        return $this->related('offer', function($query) use ($types) {
+        return $this->related('offer', function ($query) use ($types) {
             return $query->whereIn('offer_type_id', $types);
         });
     }
 
-    public function offerStatuses($statuses): PostulationFilter
+    public function offerStatuses($statuses): self
     {
-        return $this->related('offer', function($query) use ($statuses) {
+        return $this->related('offer', function ($query) use ($statuses) {
             return $query->whereIn('offer_status_id', $statuses);
         });
     }
 
-    public function categories($categories): PostulationFilter
+    public function categories($categories): self
     {
-        return $this->related('offer', function($query) use ($categories) {
+        return $this->related('offer', function ($query) use ($categories) {
             return $query->whereIn('category_id', $categories);
         });
     }
 
-    public function conditions($conditions): PostulationFilter
+    public function conditions($conditions): self
     {
-        return $this->related('offer', function($query) use ($conditions) {
+        return $this->related('offer', function ($query) use ($conditions) {
             return $query->whereIn('condition_id', $conditions);
         });
     }

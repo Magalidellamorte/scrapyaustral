@@ -20,10 +20,10 @@ class PasswordResetLinkController extends Controller
 
         $user = User::where(['email' => $request->email])->first();
 
-        if(!$user) {
+        if (!$user) {
             return response()->json([
                 'success' => true,
-                'message' => 'El código de reseteo fue enviado a tu correo electrónico.'
+                'message' => 'El código de reseteo fue enviado a tu correo electrónico.',
             ]);
         }
 
@@ -33,7 +33,7 @@ class PasswordResetLinkController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'El código de reseteo fue enviado a tu correo electrónico.'
+            'message' => 'El código de reseteo fue enviado a tu correo electrónico.',
         ]);
     }
 }

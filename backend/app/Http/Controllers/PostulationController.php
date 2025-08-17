@@ -40,10 +40,11 @@ class PostulationController extends Controller
 
         $postulation = Postulation::where('user_id', $user->id)->where('offer_id', $offer->id)->firstOr(function () use (&$isEdit) {
             $isEdit = false;
+
             return new Postulation();
         });
 
-        if($postulation->offer_status_id && $postulation->offer_status_id != 1  && $postulation->offer_status_id != 4) {
+        if ($postulation->offer_status_id && 1 != $postulation->offer_status_id && 4 != $postulation->offer_status_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'No puedes editar una oferta en progreso/rechazada',
@@ -56,22 +57,20 @@ class PostulationController extends Controller
         $postulation->shipment_start_date = $request->shipment_start_date;
         $postulation->shipment_end_date = $request->shipment_end_date;
 
-
-
         $postulation->value_with_shipping = $request->value_with_shipping;
         $postulation->value_without_shipping = $request->value_without_shipping;
 
-        if($request->pick_by_scraper) {
-            $postulation->pick_by_scraper = $request->pick_by_scraper === 'true';
+        if ($request->pick_by_scraper) {
+            $postulation->pick_by_scraper = 'true' === $request->pick_by_scraper;
         }
 
-        if($request->send_by_client) {
-            $postulation->send_by_client = $request->send_by_client === 'true';
+        if ($request->send_by_client) {
+            $postulation->send_by_client = 'true' === $request->send_by_client;
         }
 
         $postulation->save();
 
-        if(!$isEdit) {
+        if (!$isEdit) {
             $text = 'Hola, soy ' . $user->full_name . '. Estoy interesado en: ' . $offer->title . '.';
 
             ChatMessage::create([
@@ -79,30 +78,34 @@ class PostulationController extends Controller
                 'receiver_id' => $offer->user->id,
                 'offer_id' => $offer->id,
                 'text' => $text,
-                'automatic' => true
+                'automatic' => true,
             ]);
 
             ExpoNotification::send(
                 [$offer->user],
                 '¡Nuevo interesado para ' . $offer->title . '!',
                 $user->full_name . ' hizo una oferta',
-                ['new_offer' => $offer->id], [
+                ['new_offer' => $offer->id],
+                [
                     'goTo' => 'ViewOwnOffer',
                     'goToParams' => [
-                        'id' => $offer->id
-                    ]
-                ]);
+                        'id' => $offer->id,
+                    ],
+                ]
+            );
         } else {
             ExpoNotification::send(
                 [$offer->user],
                 '¡Editaron una oferta en ' . $offer->title . '!',
                 $user->full_name . ' modificó su postulación',
-                ['new_offer' => $offer->id], [
+                ['new_offer' => $offer->id],
+                [
                     'goTo' => 'ViewOwnOffer',
                     'goToParams' => [
-                        'id' => $offer->id
-                    ]
-                ]);
+                        'id' => $offer->id,
+                    ],
+                ]
+            );
         }
 
         return response()->json([
@@ -124,21 +127,21 @@ class PostulationController extends Controller
 
         $rejectedIds = [];
 
-        foreach($postulation->offer->postulations->where('offer_status_id', 1)->where('id', '!=', $postulation->id) as $p) {
+        foreach ($postulation->offer->postulations->where('offer_status_id', 1)->where('id', '!=', $postulation->id) as $p) {
             $p->offer_status_id = 4; // Rechazada
             $p->save();
 
             $rejectedIds[] = $p->user;
         }
 
-        if(count($rejectedIds)) {
+        if (count($rejectedIds)) {
             ExpoNotification::send($rejectedIds, '¡Han rechazado tu postulación!', 'El anunciante de "' . $postulation->offer->title . '" decidió continuar con otro Scraper', [
-                'new_offer' => $postulation->offer->id
+                'new_offer' => $postulation->offer->id,
             ], [
                 'goTo' => 'ViewOwnOffer',
                 'goToParams' => [
-                    'id' => $postulation->offer->id
-                ]
+                    'id' => $postulation->offer->id,
+                ],
             ]);
         }
 
@@ -150,13 +153,13 @@ class PostulationController extends Controller
         $postulation->push();
 
         ExpoNotification::send([$postulation->user], '¡Han aceptado tu postulación!', 'Tu postulación para ' . $offer->title . ' fue aceptada', [
-            'new_offer' => $offer->id
+            'new_offer' => $offer->id,
         ], [
             'goTo' => 'ChatInternal',
             'goToParams' => [
                 'toUser' => $user,
-                'offerId' => $offer->id
-            ]
+                'offerId' => $offer->id,
+            ],
         ]);
 
         return response()->json([
@@ -180,12 +183,12 @@ class PostulationController extends Controller
         $postulation->save();
 
         ExpoNotification::send([$postulation->user], '¡Han rechazado tu postulación!', 'Tu postulación para ' . $postulation->offer->title . ' fue rechazada', [
-            'new_offer' => $postulation->offer->id
+            'new_offer' => $postulation->offer->id,
         ], [
             'goTo' => 'ViewOwnOffer',
             'goToParams' => [
-                'id' => $postulation->offer->id
-            ]
+                'id' => $postulation->offer->id,
+            ],
         ]);
 
         return response()->json([
@@ -193,8 +196,6 @@ class PostulationController extends Controller
             'message' => 'Has rechazado la oferta',
         ]);
     }
-
-
 
     public function confirm(Request $request, Postulation $postulation): JsonResponse
     {
@@ -204,10 +205,10 @@ class PostulationController extends Controller
         $offer->save();
 
         $offerPostulations = Postulation::where('offer_id', $postulation->offer_id)
-        ->where('id','!=',$postulation->id)
-        ->whereIn('offer_status_id', [1,2,4])
+        ->where('id', '!=', $postulation->id)
+        ->whereIn('offer_status_id', [1, 2, 4])
         ->get();
-        foreach($offerPostulations as $offerPostulation){
+        foreach ($offerPostulations as $offerPostulation) {
             $offerPostulation->offer_status_id = 6; // Finalizada con error
             $offerPostulation->save();
         }
@@ -227,7 +228,7 @@ class PostulationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $request->rating .' - '. $request->reason. ' - '. $postulation->user->id .' - OK',
+            'message' => $request->rating . ' - ' . $request->reason . ' - ' . $postulation->user->id . ' - OK',
         ]);
     }
 
@@ -257,7 +258,6 @@ class PostulationController extends Controller
         $postulation->offer_status_id = 5; // Finalizada con exito
         $postulation->save();
 
-
         return response()->json([
             'success' => true,
             'message' => 'OK',
@@ -275,7 +275,7 @@ class PostulationController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($postulation->offer_status_id != 2) { // En curso
+        if (2 != $postulation->offer_status_id) { // En curso
             return response()->json([
                 'success' => false,
                 'message' => '¡La postulación tiene que estar en curso!',
@@ -285,15 +285,20 @@ class PostulationController extends Controller
         $postulation->offer_status_id = 6; // Retirando
         $postulation->save();
 
-        ExpoNotification::send([$postulation->offer->user], '¡Han comenzado un retiro!',
-            $postulation->user->full_name . ' inicio el retiro de ' . $postulation->offer->title, [
-            'new_offer' => $postulation->offer->id
-        ], [
-            'goTo' => 'ViewOwnOffer',
-            'goToParams' => [
-                'id' => $postulation->offer->id
+        ExpoNotification::send(
+            [$postulation->offer->user],
+            '¡Han comenzado un retiro!',
+            $postulation->user->full_name . ' inicio el retiro de ' . $postulation->offer->title,
+            [
+                'new_offer' => $postulation->offer->id,
+            ],
+            [
+                'goTo' => 'ViewOwnOffer',
+                'goToParams' => [
+                    'id' => $postulation->offer->id,
+                ],
             ]
-        ]);
+        );
 
         return response()->json([
             'success' => true,
@@ -312,7 +317,7 @@ class PostulationController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($postulation->offer_status_id != 2 && $postulation->offer_status_id != 6) { // En curso, en retiro
+        if (2 != $postulation->offer_status_id && 6 != $postulation->offer_status_id) { // En curso, en retiro
             return response()->json([
                 'success' => false,
                 'message' => '¡La postulación tiene que estar en curso!',
@@ -326,7 +331,7 @@ class PostulationController extends Controller
 
         $ratingExists = Rating::where('user_id', $postulation->user->id)->where('offer_id', $offer->id)->first();
 
-        if(!$ratingExists) {
+        if (!$ratingExists) {
             Rating::create([
                 'user_id' => $postulation->user->id,
                 'client_id' => $offer->user->id,
@@ -344,15 +349,20 @@ class PostulationController extends Controller
             ]);
         }
 
-        ExpoNotification::send([$postulation->offer->user], '¡Han recibido el producto!',
-            $postulation->user->full_name . ' recibió el producto: ' . $postulation->offer->title, [
-                'new_offer' => $postulation->offer->id
-        ], [
-            'goTo' => 'ViewOwnOffer',
-            'goToParams' => [
-                'id' => $postulation->offer->id
+        ExpoNotification::send(
+            [$postulation->offer->user],
+            '¡Han recibido el producto!',
+            $postulation->user->full_name . ' recibió el producto: ' . $postulation->offer->title,
+            [
+                'new_offer' => $postulation->offer->id,
+            ],
+            [
+                'goTo' => 'ViewOwnOffer',
+                'goToParams' => [
+                    'id' => $postulation->offer->id,
+                ],
             ]
-        ]);
+        );
 
         return response()->json([
             'success' => true,
@@ -360,7 +370,8 @@ class PostulationController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, Postulation $postulation)  {
+    public function cancel(Request $request, Postulation $postulation)
+    {
         $user = auth()->user();
 
         if ($user->id !== $postulation->user->id) {
@@ -370,17 +381,17 @@ class PostulationController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($postulation->offer_status_id != 2 && $postulation->offer_status_id != 1) { // En curso, Pendiente
+        if (2 != $postulation->offer_status_id && 1 != $postulation->offer_status_id) { // En curso, Pendiente
             return response()->json([
                 'success' => false,
                 'message' => '¡La postulación tiene que estar en curso/pendiente!',
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($postulation->offer_status_id == 2) {// En curso (aceptada)
+        if (2 == $postulation->offer_status_id) {// En curso (aceptada)
             $ratingExists = Rating::where('user_id', $postulation->user->id)->where('offer_id', $postulation->offer->id)->first();
 
-            if(!$ratingExists) {
+            if (!$ratingExists) {
                 Rating::create([
                     'user_id' => $postulation->user->id,
                     'client_id' => $postulation->offer->user->id,
@@ -397,25 +408,29 @@ class PostulationController extends Controller
                     'pending' => 0,
                 ]);
             }
-
         }
 
-        if($request->reasonId) {
+        if ($request->reasonId) {
             $postulation->close_postulation_reason_id = $request->reasonId;
         }
 
         $postulation->offer_status_id = 5; // Cancelada
         $postulation->save();
 
-        ExpoNotification::send([$postulation->offer->user], '¡Han cancelado una postulación!',
-            $postulation->user->full_name . ' canceló la postulación a ' . $postulation->offer->title, [
-                'new_offer' => $postulation->offer->id
-        ], [
-            'goTo' => 'ViewOwnOffer',
-            'goToParams' => [
-                'id' => $postulation->offer->id
+        ExpoNotification::send(
+            [$postulation->offer->user],
+            '¡Han cancelado una postulación!',
+            $postulation->user->full_name . ' canceló la postulación a ' . $postulation->offer->title,
+            [
+                'new_offer' => $postulation->offer->id,
+            ],
+            [
+                'goTo' => 'ViewOwnOffer',
+                'goToParams' => [
+                    'id' => $postulation->offer->id,
+                ],
             ]
-        ]);
+        );
 
         return response()->json([
             'success' => true,

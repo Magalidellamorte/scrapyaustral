@@ -2,13 +2,13 @@
 
 namespace App\Auth\Passwords;
 
-use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Exception;
+use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 
 class CustomDatabaseTokenRepository extends DatabaseTokenRepository
 {
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function createNewToken()
     {

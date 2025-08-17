@@ -13,19 +13,18 @@ class EnsureUserIsAdminLocalidad
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure(Request): (Response|RedirectResponse) $next
-     * @return ResponseAlias
+     * @param \Closure(Request): (Response|RedirectResponse) $next
      */
-    public function handle(Request $request, Closure $next): ResponseAlias
+    public function handle(Request $request, \Closure $next): ResponseAlias
     {
         $user = auth()->user();
         if (!$user || !$user->isAdminLocalidad() || !$user->localidad_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Acceso restringido a usuarios administradores.'
+                'message' => 'Acceso restringido a usuarios administradores.',
             ], ResponseAlias::HTTP_FORBIDDEN);
         }
+
         return $next($request);
     }
 }

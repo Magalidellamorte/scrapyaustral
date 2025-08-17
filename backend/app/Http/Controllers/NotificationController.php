@@ -9,7 +9,7 @@ class NotificationController extends Controller
 {
     public function index(): JsonResponse
     {
-        $notifications = auth()->user()->notifications()->orderBy('created_at','DESC')->get();
+        $notifications = auth()->user()->notifications()->orderBy('created_at', 'DESC')->get();
 
         return response()->json($notifications);
     }
@@ -22,7 +22,7 @@ class NotificationController extends Controller
     public function readAll(): JsonResponse
     {
         $notifications = auth()->user()->notifications()->whereNull('read_at')->get();
-        foreach($notifications as $notification){
+        foreach ($notifications as $notification) {
             $notification->read_at = Carbon::now();
             $notification->save();
         }

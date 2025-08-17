@@ -17,10 +17,6 @@ class ZonePolicy
 
     /**
      * Determine whether the user can view the model.
-     *
-     * @param User $user
-     * @param Zone $zone
-     * @return bool
      */
     public function view(User $user, Zone $zone): bool
     {
@@ -29,10 +25,6 @@ class ZonePolicy
 
     /**
      * Determine whether the user can update the model.
-     *
-     * @param User $user
-     * @param Zone $zone
-     * @return bool
      */
     public function update(User $user, Zone $zone): bool
     {
@@ -41,10 +33,6 @@ class ZonePolicy
 
     /**
      * Determine whether the user can delete the model.
-     *
-     * @param User $user
-     * @param Zone $zone
-     * @return bool
      */
     public function delete(User $user, Zone $zone): bool
     {

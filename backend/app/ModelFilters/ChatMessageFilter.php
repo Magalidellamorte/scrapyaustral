@@ -8,17 +8,17 @@ class ChatMessageFilter extends ModelFilter
 {
     public $relations = [];
 
-    public function scraper($scraper): ChatMessageFilter
+    public function scraper($scraper): self
     {
         $userId = auth()->user()->id;
 
-        if($scraper === 'true' || $scraper === true) {
-            return $this->related('offer.user', function($query) use ($userId) {
+        if ('true' === $scraper || true === $scraper) {
+            return $this->related('offer.user', function ($query) use ($userId) {
                 return $query->where('id', '!=', $userId);
             });
         }
 
-        return $this->related('offer.user', function($query) use ($userId) {
+        return $this->related('offer.user', function ($query) use ($userId) {
             return $query->where('id', '=', $userId);
         });
     }

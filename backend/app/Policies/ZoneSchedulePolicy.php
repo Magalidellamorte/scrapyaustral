@@ -18,15 +18,12 @@ class ZoneSchedulePolicy
         if ($schedulable instanceof Zone || $schedulable instanceof SubZone) {
             return $schedulable->localidad_id === $user->localidad_id;
         }
+
         return false;
     }
 
     /**
      * Determine whether the user can view the model.
-     *
-     * @param User $user
-     * @param ZoneSchedule $zoneSchedule
-     * @return bool
      */
     public function view(User $user, ZoneSchedule $zoneSchedule): bool
     {
@@ -35,10 +32,6 @@ class ZoneSchedulePolicy
 
     /**
      * Determine whether the user can update the model.
-     *
-     * @param User $user
-     * @param ZoneSchedule $zoneSchedule
-     * @return bool
      */
     public function update(User $user, ZoneSchedule $zoneSchedule): bool
     {
@@ -47,10 +40,6 @@ class ZoneSchedulePolicy
 
     /**
      * Determine whether the user can delete the model.
-     *
-     * @param User $user
-     * @param ZoneSchedule $zoneSchedule
-     * @return bool
      */
     public function delete(User $user, ZoneSchedule $zoneSchedule): bool
     {
