@@ -105,9 +105,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "${GREEN}✅ Static analysis passed${RESET}"
 
-# Clean up PHP-CS-Fixer (optional)
-rm -f php-cs-fixer .php-cs-fixer.cache
-
 echo ""
 echo "${GREEN}${BOLD}🎉 All pre-push checks passed! Proceeding with push...${RESET}"
 echo "${GREEN}✨ Your Laravel code is ready for the CI pipeline!${RESET}"
