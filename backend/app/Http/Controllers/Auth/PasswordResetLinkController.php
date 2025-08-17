@@ -34,15 +34,13 @@ class PasswordResetLinkController extends Controller
             $request->only('email')
         );
 
-        if ($status == Password::RESET_LINK_SENT) {
+        if (Password::RESET_LINK_SENT == $status) {
             return response()->json([
                 'success' => true,
                 'message' => 'El código de reseteo fue enviado a tu correo electrónico.',
             ]);
         }
 
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
+        throw ValidationException::withMessages(['email' => [trans($status)]]);
     }
 }
