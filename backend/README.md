@@ -87,12 +87,6 @@ Manual steps:
    ```shell
    cp .env.example .env
    ```
-   In `.env`, set:
-   ```dotenv
-   DB_HOST=db
-   DB_USERNAME=scrapy_admin
-   DB_PASSWORD=$$cr4pyR00t!
-   ```
 3. Configure `.env`. Minimal configuration:
    ```dotenv
    DB_HOST=db
