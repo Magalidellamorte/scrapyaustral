@@ -103,7 +103,7 @@ if [ $? -ne 0 ]; then
   vendor/bin/phpstan analyse
   exit 1
 fi
-echo "${GREEN}✅ Static analysis passed${RESET}"
+echo "${GREEN}✅ Static analysis passed${RESET}" 
 
 echo ""
 echo "${GREEN}${BOLD}🎉 All pre-push checks passed! Proceeding with push...${RESET}"
