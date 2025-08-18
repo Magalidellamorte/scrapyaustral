@@ -9,6 +9,229 @@ servers:
   - url: http://localhost:8000/api
     description: Entorno local (Docker / php artisan serve)
 paths:
+  /offers:
+    post:
+      summary: Crear un nuevo anuncio
+      description: >-
+        Permite crear un nuevo anuncio de material reciclable. Incluye validación
+        completa de datos, manejo de imágenes múltiples con redimensionamiento automático,
+        creación de dirección con datos geográficos dinámicos, y notificaciones
+        automáticas a usuarios interesados en la categoría.
+      tags:
+        - offers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - offer_type_id
+                - category_id
+                - condition_id
+                - title
+                - description
+                - quantity
+                - measure_type_id
+                - address[street]
+                - address[street_number]
+              properties:
+                offer_type_id:
+                  type: integer
+                  description: ID del tipo de oferta (ver /offer_types)
+                  example: 1
+                category_id:
+                  type: integer
+                  description: ID de la categoría del material (ver /categories)
+                  example: 1
+                condition_id:
+                  type: integer
+                  description: ID de la condición del material (ver /conditions)
+                  example: 1
+                title:
+                  type: string
+                  maxLength: 255
+                  description: Título del anuncio
+                  example: "Vendo cartón en excelente estado"
+                description:
+                  type: string
+                  maxLength: 2000
+                  description: Descripción detallada del material
+                  example: "Cartón limpio y seco, ideal para reciclaje. Proveniente de embalajes de productos electrónicos."
+                quantity:
+                  type: string
+                  maxLength: 2000
+                  description: Cantidad disponible del material
+                  example: "50"
+                measure_type_id:
+                  type: integer
+                  description: ID del tipo de medida (ver /measure_types)
+                  example: 2
+                value_with_shipping:
+                  type: integer
+                  description: Precio con envío (opcional, solo para ofertas de venta)
+                  example: 500
+                value_without_shipping:
+                  type: integer
+                  description: Precio sin envío (opcional, solo para ofertas de venta)
+                  example: 400
+                pick_by_scraper:
+                  type: string
+                  enum: [true, false]
+                  description: Si el scraper puede recoger el material
+                  example: "true"
+                pick_by_donor:
+                  type: string
+                  enum: [true, false]
+                  description: Si el donante puede enviar el material
+                  example: "false"
+                address[street]:
+                  type: string
+                  maxLength: 255
+                  description: Nombre de la calle
+                  example: "Av. Corrientes"
+                address[street_number]:
+                  type: string
+                  maxLength: 255
+                  description: Número de la dirección
+                  example: "1234"
+                address[postal_code]:
+                  type: string
+                  maxLength: 255
+                  description: Código postal (opcional)
+                  example: "C1043AAZ"
+                address[floor]:
+                  type: string
+                  maxLength: 255
+                  description: Piso (opcional)
+                  example: "2"
+                address[apartment]:
+                  type: string
+                  maxLength: 255
+                  description: Departamento (opcional)
+                  example: "A"
+                address[latitude]:
+                  type: number
+                  format: float
+                  description: Latitud geográfica (opcional)
+                  example: -34.6037389
+                address[longitude]:
+                  type: number
+                  format: float
+                  description: Longitud geográfica (opcional)
+                  example: -58.3837591
+                address[province]:
+                  type: string
+                  description: Nombre de la provincia (se crea automáticamente si no existe)
+                  example: "Buenos Aires"
+                address[city]:
+                  type: string
+                  description: Nombre de la ciudad (se crea automáticamente si no existe)
+                  example: "Buenos Aires"
+                address[neighborhood]:
+                  type: string
+                  description: Nombre del barrio (se crea automáticamente si no existe)
+                  example: "San Nicolás"
+                images[0]:
+                  type: string
+                  format: binary
+                  description: Primera imagen del anuncio (opcional)
+                images[1]:
+                  type: string
+                  format: binary
+                  description: Segunda imagen del anuncio (opcional)
+                images[2]:
+                  type: string
+                  format: binary
+                  description: Tercera imagen del anuncio (opcional)
+            examples:
+              example_venta:
+                summary: Anuncio de venta
+                value:
+                  offer_type_id: 1
+                  category_id: 1
+                  condition_id: 1
+                  title: "Vendo cartón en excelente estado"
+                  description: "Cartón limpio y seco, ideal para reciclaje"
+                  quantity: "50"
+                  measure_type_id: 2
+                  value_with_shipping: 500
+                  value_without_shipping: 400
+                  pick_by_scraper: "true"
+                  pick_by_donor: "false"
+                  address[street]: "Av. Corrientes"
+                  address[street_number]: "1234"
+                  address[province]: "Buenos Aires"
+                  address[city]: "Buenos Aires"
+                  address[neighborhood]: "San Nicolás"
+              example_donacion:
+                summary: Anuncio de donación
+                value:
+                  offer_type_id: 2
+                  category_id: 3
+                  condition_id: 2
+                  title: "Dono plásticos varios"
+                  description: "Botellas de plástico limpias y tapitas"
+                  quantity: "20"
+                  measure_type_id: 1
+                  pick_by_scraper: "true"
+                  pick_by_donor: "false"
+                  address[street]: "San Martín"
+                  address[street_number]: "567"
+                  address[province]: "Córdoba"
+                  address[city]: "Córdoba"
+      responses:
+        '200':
+          description: Anuncio creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "Publicaciòn creada correctamente"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    message: "Unauthenticated."
+        '422':
+          description: Error de validación en los datos enviados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                validation_error:
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      title:
+                        - "The title field is required."
+                      category_id:
+                        - "The selected category id is invalid."
+                      address.street:
+                        - "The address.street field is required."
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                server_error:
+                  value:
+                    message: "Internal server error during image processing or email notification"
+
   /offer_types:
     get:
       summary: Lista de tipos de oferta
@@ -34,6 +257,13 @@ paths:
                       name: Donar
                       enabled: '1'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de autenticación JWT obtenido del endpoint /auth/login
+
   schemas:
     OfferType:
       type: object
@@ -48,4 +278,39 @@ components:
           type: string
           description: Indicador de habilitación ("1" = habilitado)
           example: '1'
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operación exitosa"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error description"
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The given data was invalid."
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            title:
+              - "The title field is required."
+            category_id:
+              - "The selected category id is invalid."
 
