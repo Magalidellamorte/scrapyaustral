@@ -40,11 +40,12 @@ class OpenPostulationRemainder extends Command
                 [$postulation->user],
                 '¡Debes dar una resolución a tu postulación!',
                 'El plazo acordado para ' . $postulation->offer->title . ' ya vencio, necesitamos una resolución.',
-                [ 'new_offer' => $postulation->offer->id], [
+                ['new_offer' => $postulation->offer->id],
+                [
                     'goTo' => 'ViewOwnOffer',
                     'goToParams' => [
-                        'id' => $postulation->offer->user
-                    ]
+                        'id' => $postulation->offer->user,
+                    ],
                 ]
             );
 
@@ -52,14 +53,14 @@ class OpenPostulationRemainder extends Command
                 [$postulation->offer->user],
                 '¡Debes dar una resolución a tu anuncio!',
                 'El plazo acordado para ' . $postulation->offer->title . ' ya venció, necesitamos una resolución.',
-                [ 'new_offer' => $postulation->offer->id], [
+                ['new_offer' => $postulation->offer->id],
+                [
                     'goTo' => 'ViewOwnOffer',
                     'goToParams' => [
-                        'id' => $postulation->offer->user
-                    ]
+                        'id' => $postulation->offer->user,
+                    ],
                 ]
             );
-
         }
 
         return 0;

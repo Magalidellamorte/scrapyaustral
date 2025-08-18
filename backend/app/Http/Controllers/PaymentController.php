@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    public function success(Request $request, Invoice $invoice) {
-        if($invoice->paid_at) {
+    public function success(Request $request, Invoice $invoice)
+    {
+        if ($invoice->paid_at) {
             return;
         }
 
@@ -18,7 +19,7 @@ class PaymentController extends Controller
         $subscription = $invoice->subscription;
         $plan = $subscription->plan;
 
-        if($subscription->ends_at < Carbon::now()) {
+        if ($subscription->ends_at < Carbon::now()) {
             $subscription->ends_at = Carbon::now()->add($plan->invoice_period, $plan->invoice_interval);
         } else {
             $subscription->ends_at = $subscription->ends_at->add($plan->invoice_period, $plan->invoice_interval);

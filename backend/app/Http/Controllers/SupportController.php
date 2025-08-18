@@ -24,7 +24,7 @@ class SupportController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '¡Consulta enviada correctamente!'
+            'message' => '¡Consulta enviada correctamente!',
         ]);
     }
 }

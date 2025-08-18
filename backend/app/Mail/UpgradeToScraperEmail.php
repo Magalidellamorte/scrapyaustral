@@ -4,9 +4,9 @@ namespace App\Mail;
 
 use App\Models\Plan;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 class UpgradeToScraperEmail extends Mailable
 {

@@ -23,7 +23,8 @@ class Invoice extends Model
         'token',
     ];
 
-    public function subscription(): BelongsTo {
+    public function subscription(): BelongsTo
+    {
         return $this->belongsTo(Subscription::class);
     }
 }

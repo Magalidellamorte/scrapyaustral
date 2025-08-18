@@ -15,7 +15,7 @@ class CityController extends Controller
 
         $cities = City::where('province_id', $province->id);
 
-        if (! in_array('unused', $includes)) {
+        if (!in_array('unused', $includes)) {
             $cities->used();
         }
 

@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateOfferRequest;
 use App\Http\Requests\CreateOfferHogarRequest;
+use App\Http\Requests\CreateOfferRequest;
 use App\Models\Category;
 use App\Models\ChatMessage;
+use App\Models\City;
 use App\Models\Image;
+use App\Models\Neighborhood;
 use App\Models\Offer;
+use App\Models\OfferTorky;
+use App\Models\Province;
 use App\Models\Rating;
 use App\Models\User;
-use App\Models\City;
-use App\Models\Province;
-use App\Models\Neighborhood;
-use App\Models\OfferTorky;
 use App\Services\ExpoNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Intervention\Image\Facades\Image as InterventionImage;
-use Storage;
 use Mail;
+use Storage;
 
 class OfferController extends Controller
 {
@@ -36,35 +36,34 @@ class OfferController extends Controller
         // if(!empty($requestData))
         //     $offers = $offers->filter($requestData);
 
-        if($request->get('view') == 'last_offers'){
-            $offers = $offers->where('user_id','!=',$user->id);
+        if ('last_offers' == $request->get('view')) {
+            $offers = $offers->where('user_id', '!=', $user->id);
         }
 
-        if($user->type === 'torky'){
+        if ('torky' === $user->type) {
             $paginate = 1000;
-            $offers = $offers->whereHas('address', function($query) {
+            $offers = $offers->whereHas('address', function ($query) {
                 $query->where('neighborhood_id', 368);
             });
-            $offers = $offers->whereHas('user', function($query) {
+            $offers = $offers->whereHas('user', function ($query) {
                 $query->where('type', 'hogar');
             });
             $offers = $offers->whereDoesntHave('torkies');
-        }elseif($request->get('own') !== 'true'){
-            $offers = $offers->whereHas('user', function($query) {
+        } elseif ('true' !== $request->get('own')) {
+            $offers = $offers->whereHas('user', function ($query) {
                 $query->where('type', '!=', 'hogar');
             });
         }
-
 
         // $distance = intval($request->get('distance')) ?? 0;
         // if ($user->address->latitude && $user->address->longitude && ($distance < 100 && $distance > 0)) {
         //     $offers->inDistance(10, $user->address->latitude, $user->address->longitude);
         // }
 
-        $offers = $offers->with('offerCategories')->orderBy('created_at','DESC')->paginate($paginate)->withQueryString();
+        $offers = $offers->with('offerCategories')->orderBy('created_at', 'DESC')->paginate($paginate)->withQueryString();
 
         return response()->json([
-           $offers,
+            $offers,
         ]);
     }
 
@@ -82,37 +81,35 @@ class OfferController extends Controller
         $offer->quantity = $request->quantity;
         $offer->measure_type_id = $request->measure_type_id;
 
-        if($request->value_with_shipping) {
+        if ($request->value_with_shipping) {
             $offer->value_with_shipping = $request->value_with_shipping;
         }
 
-        if($request->value_without_shipping) {
+        if ($request->value_without_shipping) {
             $offer->value_without_shipping = $request->value_without_shipping;
         }
 
-        $offer->pick_by_scraper = $request->pick_by_scraper === 'true';
-        $offer->send_by_client = $request->pick_by_donor === 'true';
+        $offer->pick_by_scraper = 'true' === $request->pick_by_scraper;
+        $offer->send_by_client = 'true' === $request->pick_by_donor;
         $offer->valid_until = Carbon::now()->addMonth();
         $offer->save();
-
 
         $syncData = [];
         if ($request->category_id) {
             $syncData[$request->category_id] = [
                 'measure_type_id' => $request->measure_type_id,
                 'quantity' => $request->quantity,
-                'condition_id' => $request->condition_id
+                'condition_id' => $request->condition_id,
             ];
         }
         $offer->offerCategories()->sync($syncData);
 
-        $addressMerge=[
+        $addressMerge = [
             'neighborhood_id' => Neighborhood::createOrGet($request),
             'city_id' => City::createOrGet($request),
-            'province_id' => Province::createOrGet($request)
+            'province_id' => Province::createOrGet($request),
         ];
-        $address=array_merge($request['address'],$addressMerge);
-
+        $address = array_merge($request['address'], $addressMerge);
 
         $offer->address()->create($address);
 
@@ -127,34 +124,34 @@ class OfferController extends Controller
                 $image->encode('jpg', 60);
 
                 $path = $photo->hashName(Offer::STORAGE_PATH . $offer->id);
-                Storage::disk('public')->put($path, (string) $image);
+                \Storage::disk('public')->put($path, (string) $image);
 
                 // Guarda la ruta y otros datos en la base de datos
                 $dbImage = new Image();
                 $dbImage->path = $path;
-                $dbImage->bytes = Storage::disk('public')->size($path);
+                $dbImage->bytes = \Storage::disk('public')->size($path);
 
                 $offer->images()->save($dbImage);
             }
         }
 
         ExpoNotification::send(Category::find($offer->category_id)->toNotifyNewOffer()->get(), '¡Nuevo anuncio que podría interesarte!', $offer->title . ' se ha publicado', [
-            'new_offer' => $offer->id
+            'new_offer' => $offer->id,
         ], [
             'goTo' => 'ViewOwnOffer',
             'goToParams' => [
-                'id' => $offer->id
-            ]
+                'id' => $offer->id,
+            ],
         ]);
 
         $emailData = [
             'title' => $request->title,
             'description' => $request->description,
-            'user' => auth()->user()->first_name .' '.auth()->user()->last_name
+            'user' => auth()->user()->first_name . ' ' . auth()->user()->last_name,
         ];
 
         try {
-            Mail::raw("🚀 Nuevo post en Scrapy 🎉: \nTítulo: " . $emailData['title'] . "\nDescripción: " . $emailData['description'] . "\nPublicado por: " . $emailData['user'], function ($message) {
+            \Mail::raw("🚀 Nuevo post en Scrapy 🎉: \nTítulo: " . $emailData['title'] . "\nDescripción: " . $emailData['description'] . "\nPublicado por: " . $emailData['user'], function ($message) {
                 $message->to('magadm.09@gmail.com')
                 ->subject('🚀 Nuevo post en Scrapy 🎉');
             });
@@ -168,18 +165,18 @@ class OfferController extends Controller
         ]);
     }
 
-
     public function show(Request $request, Offer $offer): JsonResponse
     {
         $offer->load('offerCategories');
         $offer->load('torkies');
         $offer->load('torkies.user');
+
         return response()->json($offer);
     }
 
     public function close(Request $request, Offer $offer): JsonResponse
     {
-        if($offer->closed_reason_id) {
+        if ($offer->closed_reason_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'El anuncio ya ha sido finalizado',
@@ -238,38 +235,42 @@ class OfferController extends Controller
 
         $rejectedIds = [];
 
-        foreach($offer->postulations->whereIn('offer_status_id',[1,2]) as $p) {
+        foreach ($offer->postulations->whereIn('offer_status_id', [1, 2]) as $p) {
             $p->offer_status_id = 5; // Rechazada
             $p->save();
 
             $rejectedIds[] = $p->user;
         }
 
-        if(count($rejectedIds)) {
-            ExpoNotification::send($rejectedIds,
+        if (count($rejectedIds)) {
+            ExpoNotification::send(
+                $rejectedIds,
                 '¡Han cancelado tu postulación!',
-                'El anunciante de "' . $offer->title . '" decidió finalizar el anuncio', [
-                'new_offer' => $offer->id
-            ], [
-                'goTo' => 'ViewOwnOffer',
-                'goToParams' => [
-                    'id' => $offer->id
+                'El anunciante de "' . $offer->title . '" decidió finalizar el anuncio',
+                [
+                    'new_offer' => $offer->id,
+                ],
+                [
+                    'goTo' => 'ViewOwnOffer',
+                    'goToParams' => [
+                        'id' => $offer->id,
+                    ],
                 ]
-            ]);
+            );
         }
 
         $offer->closed_reason_id = $request->reasonId;
         // if(in_array($request->reasonId, [1, 2])) {
         //     $offer->offer_status_id = 3;
         // } else {
-            $offer->offer_status_id = 5;
+        $offer->offer_status_id = 5;
         // }
 
         $offer->save();
 
         return response()->json([
             'success' => true,
-            'message' => '¡Anuncio cerrado correctamente!'
+            'message' => '¡Anuncio cerrado correctamente!',
         ]);
     }
 
@@ -281,10 +282,10 @@ class OfferController extends Controller
             ->where('offer_id', $offer->id)
             ->exists();
 
-        if($alreadyAsked) {
+        if ($alreadyAsked) {
             return response()->json([
                 'success' => false,
-                'message' => '¡Si tienes mas preguntas puedes usar el chat!'
+                'message' => '¡Si tienes mas preguntas puedes usar el chat!',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -306,13 +307,15 @@ class OfferController extends Controller
             [$offer->user],
             '¡Te han hecho una consulta en ' . $offer->title . '!',
             $user->full_name . ' hizo una consulta en tu anuncio',
-            ['new_offer' => $offer->id], [
+            ['new_offer' => $offer->id],
+            [
                 'goTo' => 'ChatInternal',
                 'goToParams' => [
                     'toUser' => $user,
-                    'offerId' => $offer->id
-                ]
-            ]);
+                    'offerId' => $offer->id,
+                ],
+            ]
+        );
 
         return response()->json([
             'success' => true,
@@ -320,36 +323,35 @@ class OfferController extends Controller
         ]);
     }
 
-
     public function pickupTorky(Request $request, Offer $offer): JsonResponse
     {
         $user = auth()->user();
 
-        if($user->type != 'torky') {
+        if ('torky' != $user->type) {
             return response()->json([
                 'success' => false,
-                'message' => 'No tienes permisos para acceder a esta sección'
+                'message' => 'No tienes permisos para acceder a esta sección',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $torky = OfferTorky::where('offer_id', $offer->id)->first();
-        if($torky) {
-            if($torky->user_id != $user->id) {
+        if ($torky) {
+            if ($torky->user_id != $user->id) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ya hay un torky para este anuncio'
+                    'message' => 'Ya hay un torky para este anuncio',
                 ], Response::HTTP_BAD_REQUEST);
-            }else{
+            } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ya tienes una fecha de recogida para este anuncio'
+                    'message' => 'Ya tienes una fecha de recogida para este anuncio',
                 ], Response::HTTP_BAD_REQUEST);
             }
         }
         $torky = new OfferTorky();
 
-        if($offer->torky_pickup_range){
-            switch($offer->torky_pickup_range) {
+        if ($offer->torky_pickup_range) {
+            switch ($offer->torky_pickup_range) {
                 case '8 a 10':
                     $torky->expected_start_pickup_at = Carbon::parse($offer->torky_pickup_at)->setTime(8, 0, 0);
                     $torky->expected_end_pickup_at = Carbon::parse($offer->torky_pickup_at)->setTime(10, 0, 0);
@@ -382,18 +384,18 @@ class OfferController extends Controller
         $fullName = $user->first_name . ' ' . $user->last_name;
 
         // Notificar al anunciante
-            ExpoNotification::send([$offer->user], 'Un torky se ha ofrecido para recoger tu reciclable!', $fullName . ', va a ser quien recogerá tu reciclable', [
-            'new_offer' => $offer->id
+        ExpoNotification::send([$offer->user], 'Un torky se ha ofrecido para recoger tu reciclable!', $fullName . ', va a ser quien recogerá tu reciclable', [
+            'new_offer' => $offer->id,
         ], [
             'goTo' => 'ViewOwnOfferTorky',
-                'goToParams' => [
-                    'id' => $offer->id
-                ]
-            ]);
+            'goToParams' => [
+                'id' => $offer->id,
+            ],
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => '¡Anuncio actualizado correctamente!'
+            'message' => '¡Anuncio actualizado correctamente!',
         ]);
     }
 
@@ -401,17 +403,17 @@ class OfferController extends Controller
     {
         $user = auth()->user();
 
-        if($user->id != $offer->user_id) {
+        if ($user->id != $offer->user_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'No tienes permisos para eliminar este anuncio'
+                'message' => 'No tienes permisos para eliminar este anuncio',
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if($user->type != 'hogar') {
+        if ('hogar' != $user->type) {
             return response()->json([
                 'success' => false,
-                'message' => 'No tienes permisos para eliminar este anuncio'
+                'message' => 'No tienes permisos para eliminar este anuncio',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -423,10 +425,9 @@ class OfferController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '¡Anuncio eliminado correctamente!'
+            'message' => '¡Anuncio eliminado correctamente!',
         ]);
     }
-
 
     public function storeTorky(CreateOfferHogarRequest $request): JsonResponse
     {
@@ -468,9 +469,9 @@ class OfferController extends Controller
             $addressMerge = [
                 'neighborhood_id' => Neighborhood::createOrGet($request),
                 'city_id' => City::createOrGet($request),
-                'province_id' => Province::createOrGet($request)
+                'province_id' => Province::createOrGet($request),
             ];
-            $address=array_merge($request['address'],$addressMerge);
+            $address = array_merge($request['address'], $addressMerge);
 
             $offer->address()->create($address);
 
@@ -486,11 +487,11 @@ class OfferController extends Controller
                         $image->encode('jpg', 60);
 
                         $path = $photo->hashName(Offer::STORAGE_PATH . $offer->id);
-                        Storage::disk('public')->put($path, (string) $image);
+                        \Storage::disk('public')->put($path, (string) $image);
 
                         $dbImage = new Image();
                         $dbImage->path = $path;
-                        $dbImage->bytes = Storage::disk('public')->size($path);
+                        $dbImage->bytes = \Storage::disk('public')->size($path);
 
                         $offer->images()->save($dbImage);
                     } catch (\Exception $e) {
@@ -500,18 +501,16 @@ class OfferController extends Controller
                 }
             }
 
-
-            //notificar a los torkys
+            // notificar a los torkys
             $usersTorkys = User::where('type', 'torky')->get();
             ExpoNotification::send($usersTorkys, 'Hay un nuevo retiro por hacer!', '', [
-                'new_offer' => $offer->id
+                'new_offer' => $offer->id,
             ], [
                 'goTo' => 'ViewOwnOfferTorky',
                 'goToParams' => [
-                    'id' => $offer->id
-                ]
+                    'id' => $offer->id,
+                ],
             ]);
-
 
             // $emailData = [
             //     'title' => $request->title,
@@ -527,9 +526,9 @@ class OfferController extends Controller
                 'success' => true,
                 'message' => 'Publicación creada correctamente',
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Error en storeTorky: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Hubo un error al crear la publicación. Por favor, inténtelo nuevamente.',
@@ -576,5 +575,4 @@ class OfferController extends Controller
             'message' => ' OK',
         ]);
     }
-
 }

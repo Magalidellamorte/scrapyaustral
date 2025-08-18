@@ -28,14 +28,14 @@ class ChatMessageController extends Controller
 
                 $key = $sender . $receiver . $offer_id;
 
-                if($receiver > $sender) {
+                if ($receiver > $sender) {
                     $key = $receiver . $sender . $offer_id;
                 }
 
                 return $key;
             })
             ->map(function ($item) use ($user) {
-                $unreadCount= ChatMessage::where('receiver_id', $user->id)
+                $unreadCount = ChatMessage::where('receiver_id', $user->id)
                     ->where('sender_id', $user->id == $item['sender_id'] ? $item['receiver_id'] : $item['sender_id'])
                     ->where('readed', false)
                     ->count();

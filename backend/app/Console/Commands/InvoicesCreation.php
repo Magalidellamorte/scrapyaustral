@@ -22,7 +22,7 @@ class InvoicesCreation extends Command
         $subscriptions = Subscription::needsRenewal()->get();
 
         foreach ($subscriptions as $subscription) {
-            if($subscription->hasPendingInvoices()) {
+            if ($subscription->hasPendingInvoices()) {
                 return 0;
             }
 
@@ -34,20 +34,20 @@ class InvoicesCreation extends Command
                 'user_id' => $subscription->user_id,
                 'subscription_id' => $subscription->id,
                 'amount' => $subscription->plan->price,
-                'token' => Str::random(32)
+                'token' => Str::random(32),
             ]);
 
-            $preference = MP::create_preference([
+            $preference = \MP::create_preference([
                 'items' => [
                     [
                         'id' => $invoice->id,
                         'category_id' => $subscription->plan->slug,
-                        'title' => config('app.name').' - Plan: '.$subscription->plan->name,
+                        'title' => config('app.name') . ' - Plan: ' . $subscription->plan->name,
                         'description' => strip_tags($subscription->plan->text),
                         'quantity' => 1,
                         'currency_id' => $subscription->plan->currency,
                         'unit_price' => (float) $invoice->amount,
-                    ]
+                    ],
                 ],
                 'auto_return' => 'approved',
                 'back_urls' => [
@@ -63,7 +63,7 @@ class InvoicesCreation extends Command
             // if ($isEndTrial) {
             //     SendEmail::dispatch(new EndsTrialEmail($user, $invoice));
             // } else {
-                SendEmail::dispatch(new NewInvoiceEmail($user, $invoice));
+            SendEmail::dispatch(new NewInvoiceEmail($user, $invoice));
             // }
 
             $subscription->generate_invoice = 0;

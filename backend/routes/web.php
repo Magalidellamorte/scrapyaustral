@@ -18,8 +18,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::get('logs', [Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -27,4 +26,4 @@ Route::get('/dashboard', function () {
 
 Route::get('/payment/success/{invoice:token}', [PaymentController::class, 'success']);
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

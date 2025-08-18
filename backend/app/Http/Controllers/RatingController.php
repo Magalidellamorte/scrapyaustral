@@ -12,17 +12,17 @@ class RatingController extends Controller
 {
     public function update(Request $request, Rating $rating): JsonResponse
     {
-        if($rating->user_id !== $request->user()->id) {
+        if ($rating->user_id !== $request->user()->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Hubo un error al crear la calificaciòn'
+                'message' => 'Hubo un error al crear la calificaciòn',
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if(!$rating->pending) {
+        if (!$rating->pending) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ya has realizado esta calificaciòn'
+                'message' => 'Ya has realizado esta calificaciòn',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -42,19 +42,23 @@ class RatingController extends Controller
             })
             ->avg('rating');
 
-       $ratedUser->rating_average = $average;
-       $ratedUser->save();
+        $ratedUser->rating_average = $average;
+        $ratedUser->save();
 
-        ExpoNotification::send([$ratedUser],
-        '¡Te han dado una calificación!',
-        $rating->user->full_name . ' te ha calificado por el anuncio ' . $rating->offer->title, [
-            'new_offer' => $rating->offer->id
-        ], [
-            'goTo' => 'ViewOwnOffer',
-            'goToParams' => [
-                'id' => $rating->offer->id
+        ExpoNotification::send(
+            [$ratedUser],
+            '¡Te han dado una calificación!',
+            $rating->user->full_name . ' te ha calificado por el anuncio ' . $rating->offer->title,
+            [
+                'new_offer' => $rating->offer->id,
+            ],
+            [
+                'goTo' => 'ViewOwnOffer',
+                'goToParams' => [
+                    'id' => $rating->offer->id,
+                ],
             ]
-        ]);
+        );
 
         return response()->json([
             'sucess' => true,

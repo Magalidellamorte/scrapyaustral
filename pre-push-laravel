@@ -1,0 +1,113 @@
+#!/bin/sh
+
+# Pre-push hook for Laravel Backend
+# This script runs quality checks before allowing a push to remote
+
+# Colors and styles
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+echo ""
+echo "${BLUE}${BOLD}🚀 Running pre-push checks for Laravel Backend...${RESET}"
+echo ""
+
+# Get current branch name
+branch_name=$(git symbolic-ref HEAD 2>/dev/null | sed 's!refs/heads/!!')
+
+# Check if we're on a protected branch
+if [ "$branch_name" = "main" ] || [ "$branch_name" = "master" ] || [ "$branch_name" = "dev" ] || [ "$branch_name" = "develop" ]; then
+  echo ""
+  echo "${RED}${BOLD}⛔ Direct push to the '${branch_name}' branch is not allowed!${RESET}"
+  echo "${RED}🚫 Please create a Pull Request instead.${RESET}"
+  echo ""
+  exit 1
+fi
+
+# Change to backend directory
+cd backend || {
+  echo "${RED}❌ Backend directory not found!${RESET}"
+  exit 1
+}
+
+echo "${YELLOW}📁 Working in backend directory...${RESET}"
+
+# Check if composer dependencies are installed
+if [ ! -d "vendor" ]; then
+  echo "${YELLOW}⬇️  Installing Composer dependencies...${RESET}"
+  composer install --no-interaction --prefer-dist --optimize-autoloader
+  if [ $? -ne 0 ]; then
+    echo "${RED}❌ Composer install failed!${RESET}"
+    exit 1
+  fi
+fi
+
+# 1. Composer validation
+echo "${BLUE}1️⃣  Validating composer.json...${RESET}"
+composer validate
+if [ $? -ne 0 ]; then
+  echo "${RED}❌ composer.json validation failed!${RESET}"
+  exit 1
+fi
+echo "${GREEN}✅ Composer validation passed${RESET}"
+
+# 2. PHP syntax check
+echo "${BLUE}2️⃣  Checking PHP syntax...${RESET}"
+find app -name "*.php" -exec php -l {} \; > /dev/null
+if [ $? -ne 0 ]; then
+  echo "${RED}❌ PHP syntax errors found!${RESET}"
+  find app -name "*.php" -exec php -l {} \; | grep -v "No syntax errors"
+  exit 1
+fi
+echo "${GREEN}✅ PHP syntax check passed${RESET}"
+
+# 3. PHP-CS-Fixer formatting check
+echo "${BLUE}3️⃣  Checking code formatting (PHP-CS-Fixer)...${RESET}"
+
+# Download PHP-CS-Fixer if not present
+if [ ! -f "php-cs-fixer" ]; then
+  echo "${YELLOW}⬇️  Downloading PHP-CS-Fixer...${RESET}"
+  curl -L https://cs.symfony.com/download/php-cs-fixer-v3.phar -o php-cs-fixer -s
+  chmod +x php-cs-fixer
+fi
+
+./php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "${RED}❌ Code formatting issues found!${RESET}"
+  echo "${YELLOW}💡 To fix these issues, run:${RESET}"
+  echo "${YELLOW}   cd backend && ./php-cs-fixer fix --config=.php-cs-fixer.dist.php${RESET}"
+  echo "${YELLOW}   Then commit the changes and try pushing again.${RESET}"
+  echo ""
+  echo "${YELLOW}🔍 Here are the formatting issues:${RESET}"
+  ./php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff
+  exit 1
+fi
+echo "${GREEN}✅ Code formatting check passed${RESET}"
+
+# 4. PHPStan static analysis
+echo "${BLUE}4️⃣  Running static analysis (PHPStan)...${RESET}"
+
+# Check if PHPStan is available
+if [ ! -f "vendor/bin/phpstan" ]; then
+  echo "${YELLOW}⬇️  Installing PHPStan...${RESET}"
+  composer require --dev phpstan/phpstan larastan/larastan --no-interaction
+fi
+
+vendor/bin/phpstan analyse --no-progress --quiet
+if [ $? -ne 0 ]; then
+  echo "${RED}❌ PHPStan analysis failed!${RESET}"
+  echo "${YELLOW}🔍 Here are the issues:${RESET}"
+  vendor/bin/phpstan analyse
+  exit 1
+fi
+echo "${GREEN}✅ Static analysis passed${RESET}" 
+
+echo ""
+echo "${GREEN}${BOLD}🎉 All pre-push checks passed! Proceeding with push...${RESET}"
+echo "${GREEN}✨ Your Laravel code is ready for the CI pipeline!${RESET}"
+echo ""
+
+exit 0

@@ -23,10 +23,10 @@ class Address extends Model
         'neighborhood',
     ];
 
-    protected $appends = array(
+    protected $appends = [
         'readable',
         'readable_public',
-    );
+    ];
 
     public function addressable(): MorphTo
     {
@@ -84,15 +84,18 @@ class Address extends Model
     {
         $readable = [];
 
-        if($this->neighborhood)
-            $readable[]=$this->neighborhood->name;
+        if ($this->neighborhood) {
+            $readable[] = $this->neighborhood->name;
+        }
 
-        if($this->city)
-            $readable[]=$this->city->name;
+        if ($this->city) {
+            $readable[] = $this->city->name;
+        }
 
-        if($this->province)
-            $readable[]=$this->province->name;
+        if ($this->province) {
+            $readable[] = $this->province->name;
+        }
 
-        return implode(', ',$readable);
+        return implode(', ', $readable);
     }
 }

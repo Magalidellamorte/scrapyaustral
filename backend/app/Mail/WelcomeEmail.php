@@ -26,7 +26,7 @@ class WelcomeEmail extends Mailable
             ->to($this->user->email)
             ->subject('¡Bienvenido a ' . config('app.name') . '!')
             ->view('emails.welcome', [
-                'user' => $this->user
+                'user' => $this->user,
             ]);
     }
 }

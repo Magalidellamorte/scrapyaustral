@@ -28,7 +28,7 @@ class ResetPasswordEmail extends Mailable
             ->to($this->email)
             ->subject('Código para recuperar contraseña')
             ->view('emails.forgot_password', [
-                'token' => $this->token
+                'token' => $this->token,
             ]);
     }
 }

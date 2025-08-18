@@ -8,5 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class OfferType extends Model
 {
     use HasFactory;
-
 }

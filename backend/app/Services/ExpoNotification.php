@@ -7,17 +7,18 @@ use Illuminate\Support\Facades\Http;
 
 class ExpoNotification
 {
-    static function send($to, $title, $body, $data = [], $goTo = ['goTo' => null, 'goToParams' => null]) {
+    public static function send($to, $title, $body, $data = [], $goTo = ['goTo' => null, 'goToParams' => null])
+    {
         $notifications = [];
 
-        foreach($to as $user) {
-            if(!empty($user->player_id)) {
+        foreach ($to as $user) {
+            if (!empty($user->player_id)) {
                 $notifications[] = [
                     'sound' => 'default',
                     'to' => $user->player_id,
                     'title' => $title,
                     'body' => $body,
-                    'data' => $data
+                    'data' => $data,
                 ];
             }
 
@@ -31,16 +32,17 @@ class ExpoNotification
             $notification->save();
         }
 
-        if(count($notifications) > 0){
+        if (count($notifications) > 0) {
             try {
                 Http::withHeaders([
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                    'Accept-Encoding' => 'gzip, deflate, br'
+                    'Accept-Encoding' => 'gzip, deflate, br',
                 ])->post('https://exp.host/--/api/v2/push/send', $notifications);
             } catch (\Exception $e) {
                 return false;
             }
+
             return $notifications;
         }
 

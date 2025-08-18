@@ -18,16 +18,18 @@ class ZoneScheduleController extends Controller
             'end_time' => 'required|date_format:H:i:s|after:start_time',
         ]);
         $schedule = $zone->schedules()->create($validated);
+
         return response()->json([
             'success' => true,
             'message' => 'Zone schedule created.',
-            'data' => $schedule
+            'data' => $schedule,
         ], 201);
     }
 
     public function show(ZoneSchedule $zoneSchedule): JsonResponse
     {
         $this->authorize('view', $zoneSchedule);
+
         return response()->json($zoneSchedule);
     }
 
@@ -40,13 +42,16 @@ class ZoneScheduleController extends Controller
             'end_time' => 'sometimes|date_format:H:i:s|after:start_time',
         ]);
         if (empty($validated)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se enviaron campos para actualizar.'],
-                400);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'No se enviaron campos para actualizar.'],
+                400
+            );
         }
 
         $zoneSchedule->update($validated);
+
         return response()->json(['success' => true,
             'message' => 'Zone schedule updated.',
             'data' => $zoneSchedule]);
@@ -56,6 +61,7 @@ class ZoneScheduleController extends Controller
     {
         $this->authorize('delete', $zoneSchedule);
         $zoneSchedule->delete();
+
         return response()->json(['success' => true, 'message' => 'Eliminado correctamente.']);
     }
 }

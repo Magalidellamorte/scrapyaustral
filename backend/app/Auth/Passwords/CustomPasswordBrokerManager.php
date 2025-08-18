@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Auth\Passwords;
 
 use Closure;
@@ -27,12 +28,12 @@ class CustomPasswordBrokerManager extends PasswordBrokerManager
         );
     }
 
-    public function sendResetLink(array $credentials, Closure $callback = null)
+    public function sendResetLink(array $credentials, ?\Closure $callback = null)
     {
         return parent::sendResetLink($credentials, $callback);
     }
 
-    public function reset(array $credentials, Closure $callback)
+    public function reset(array $credentials, \Closure $callback)
     {
         return parent::reset($credentials, $callback);
     }

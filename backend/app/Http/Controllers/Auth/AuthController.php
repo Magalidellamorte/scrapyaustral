@@ -4,25 +4,24 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SendEmail;
-
-use App\Mail\ValidateEmail;
 use App\Mail\UpgradeToScraperEmail;
+use App\Mail\ValidateEmail;
 use App\Mail\WelcomeEmail;
 use App\Models\Availability;
-use App\Models\Image;
-use App\Models\Plan;
 use App\Models\City;
-use App\Models\Province;
+use App\Models\Image;
 use App\Models\Invoice;
 use App\Models\Neighborhood;
+use App\Models\Plan;
+use App\Models\Province;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Artisan;
 
 class AuthController extends Controller
 {
@@ -35,15 +34,15 @@ class AuthController extends Controller
 
         $credentials = request(['email', 'password']);
 
-        if(!Auth::attempt(array_merge($credentials, ['enabled' => 1]))) {
+        if (!Auth::attempt(array_merge($credentials, ['enabled' => 1]))) {
             return response()->json([
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 401);
         }
 
         $user = $request->user();
 
-        if($request->get('player_id')) {
+        if ($request->get('player_id')) {
             $user->player_id = $request->get('player_id');
             $user->save();
         }
@@ -62,13 +61,12 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
-            )->toDateTimeString()
+            )->toDateTimeString(),
         ]);
     }
 
     public function expoTokenPush(Request $request): JsonResponse
     {
-
         $request->validate([
             'player_id' => 'required|string',
         ]);
@@ -78,10 +76,9 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'message' => ''
+            'message' => '',
         ], 201);
     }
-
 
     public function register(Request $request): JsonResponse
     {
@@ -98,23 +95,23 @@ class AuthController extends Controller
             $user = new User();
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
-            $user->type = $request->user_type === 'comercio' ? 'hogar' : $request->user_type;
+            $user->type = 'comercio' === $request->user_type ? 'hogar' : $request->user_type;
 
-            if($request->user_type == 'comercio' || $request->user_type == 'industria') {
+            if ('comercio' == $request->user_type || 'industria' == $request->user_type) {
                 $user->company_title = $request->company_title ?? null;
-            }else{
+            } else {
                 $user->company_title = null;
             }
 
-            if($request->user_type == 'comercio') {
+            if ('comercio' == $request->user_type) {
                 $user->is_store = true;
-            }else{
+            } else {
                 $user->is_store = false;
             }
 
-            if($request->user_type == 'industria') {
+            if ('industria' == $request->user_type) {
                 $user->is_company = true;
-            }else{
+            } else {
                 $user->is_company = false;
             }
 
@@ -124,7 +121,7 @@ class AuthController extends Controller
             $user->admin = false;
             $user->scraper = false;
 
-            if($request->player_id) {
+            if ($request->player_id) {
                 $user->player_id = $request->player_id;
             }
             $user->save();
@@ -137,14 +134,14 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => '¡Usuario creado correctamente!'
+                'message' => '¡Usuario creado correctamente!',
             ], 201);
-
         } catch (\Exception $e) {
             \Log::error('Error en registro: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Hubo un error al crear el usuario. Por favor, inténtelo nuevamente.'
+                'message' => 'Hubo un error al crear el usuario. Por favor, inténtelo nuevamente.',
             ], 500);
         }
     }
@@ -154,60 +151,60 @@ class AuthController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'user_type' => $user->type !== 'torky' ? 'required|string' : 'sometimes|string',
+            'user_type' => 'torky' !== $user->type ? 'required|string' : 'sometimes|string',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'whatsapp' => 'required|string',
-            'email' => 'required|string|email|unique:users,email,' . $user->id ,
+            'email' => 'required|string|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string',
         ]);
 
-        if($request->user_type == 'comercio' || $request->user_type == 'industria') {
+        if ('comercio' == $request->user_type || 'industria' == $request->user_type) {
             $user->company_title = $request->company_title;
-        }else{
+        } else {
             $user->company_title = null;
         }
 
-        if($request->user_type == 'comercio') {
+        if ('comercio' == $request->user_type) {
             $user->is_store = true;
-        }else{
+        } else {
             $user->is_store = false;
         }
-        if($request->user_type == 'industria') {
+        if ('industria' == $request->user_type) {
             $user->is_company = true;
-        }else{
+        } else {
             $user->is_company = false;
         }
 
-        $user->type = $request->user_type === 'comercio' ? 'hogar' : $request->user_type;
+        $user->type = 'comercio' === $request->user_type ? 'hogar' : $request->user_type;
         $user->description = $request->description;
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->whatsapp = $request->whatsapp;
         $user->email = $request->email;
 
-        if($request->password &&  $request->confirm_password === $request->password) {
+        if ($request->password && $request->confirm_password === $request->password) {
             $user->password = Hash::make($request->password);
         }
 
         $user->save();
 
-        if($request->has('address')) {
-            $addressMerge=[
+        if ($request->has('address')) {
+            $addressMerge = [
                 'neighborhood_id' => Neighborhood::createOrGet($request),
                 'city_id' => City::createOrGet($request),
-                'province_id' => Province::createOrGet($request)
+                'province_id' => Province::createOrGet($request),
             ];
-            $address=array_merge($request['address'],$addressMerge);
+            $address = array_merge($request['address'], $addressMerge);
 
             $user->address()->updateOrCreate([
                 'addressable_type' => User::class,
-                'addressable_id' => $user->id
+                'addressable_id' => $user->id,
             ], $address);
         }
 
         return response()->json([
-            'message' => '¡Usuario actualizado correctamente!'
+            'message' => '¡Usuario actualizado correctamente!',
         ], 201);
     }
 
@@ -223,37 +220,34 @@ class AuthController extends Controller
         $user->description = $request->description;
         $user->scraper = 1;
 
-
-        //Si cambia el company vuelve a pedir validacion
-        if($user->is_company != $request->is_company){
+        // Si cambia el company vuelve a pedir validacion
+        if ($user->is_company != $request->is_company) {
             $user->verified = 0;
             $user->request_validate = 0;
         }
 
-
-        if($request->has('address')) {
-            $addressMerge=[
+        if ($request->has('address')) {
+            $addressMerge = [
                 'neighborhood_id' => Neighborhood::createOrGet($request),
                 'city_id' => City::createOrGet($request),
-                'province_id' => Province::createOrGet($request)
+                'province_id' => Province::createOrGet($request),
             ];
-            $address=array_merge($request['address'],$addressMerge);
+            $address = array_merge($request['address'], $addressMerge);
 
             $user->address()->updateOrCreate([
                 'addressable_type' => User::class,
-                'addressable_id' => $user->id
+                'addressable_id' => $user->id,
             ], $address);
         }
 
         $user->categories()->sync($request->categories);
 
-
-        if($request->has('availabilities')) {
+        if ($request->has('availabilities')) {
             $user->availabilities()->delete();
 
             $availabilities = [];
 
-            foreach($request->availabilities as $availability) {
+            foreach ($request->availabilities as $availability) {
                 $availabilities[] = new Availability([
                     'day_index' => $availability['day_index'],
                     'from' => $availability['from'],
@@ -266,7 +260,7 @@ class AuthController extends Controller
 
         if ($request->has('profile_picture')) {
             $photo = $request->file('profile_picture');
-            $path = $photo->storePublicly(User::STORAGE_PATH . 'profile/'. $user->id, [
+            $path = $photo->storePublicly(User::STORAGE_PATH . 'profile/' . $user->id, [
                 'disk' => 'public',
             ]);
 
@@ -279,7 +273,7 @@ class AuthController extends Controller
 
         if ($request->has('images')) {
             foreach ($request->file('images') as $photo) {
-                $path = $photo->storePublicly(User::STORAGE_PATH . 'work/'. $user->id, [
+                $path = $photo->storePublicly(User::STORAGE_PATH . 'work/' . $user->id, [
                     'disk' => 'public',
                 ]);
 
@@ -292,9 +286,8 @@ class AuthController extends Controller
         }
         $user->save();
 
-
         // if(!$user->subscriptions()->where('ends_at','>=',Carbon::now())->count()) {
-        $plan = Plan::OrderBy('id','DESC')->get()->first();
+        $plan = Plan::OrderBy('id', 'DESC')->get()->first();
         $user->subscriptions()->create([
             'plan_id' => $plan->id,
             'free_time' => 1,
@@ -307,22 +300,21 @@ class AuthController extends Controller
         // }
 
         return response()->json([
-            'message' => '¡Perfíl actualizado!'
+            'message' => '¡Perfíl actualizado!',
         ], 200);
     }
-
-
 
     public function subscription(Request $request): JsonResponse
     {
         $user = auth()->user();
         $plan = Plan::find($request->plan_id);
-        if(!$plan)
+        if (!$plan) {
             return response()->json([
-                'message' => 'No se encontro el plan'
+                'message' => 'No se encontro el plan',
             ], 200);
-        $subscriptions=$user->subscriptions()->get();
-        foreach($subscriptions as $subscription){
+        }
+        $subscriptions = $user->subscriptions()->get();
+        foreach ($subscriptions as $subscription) {
             $subscription->delete();
         }
 
@@ -334,7 +326,7 @@ class AuthController extends Controller
             'ends_at' => Carbon::now()->add($plan->invoice_interval, $plan->invoice_period),
         ]);
         $invoices = $user->invoices()->whereNull('paid_at')->get();
-        foreach($invoices as $invoice) {
+        foreach ($invoices as $invoice) {
             $invoice->delete();
         }
 
@@ -342,7 +334,7 @@ class AuthController extends Controller
         SendEmail::dispatch(new UpgradeToScraperEmail($user, $plan));
 
         return response()->json([
-            'message' => 'Subscrition ok'
+            'message' => 'Subscrition ok',
         ], 200);
     }
 
@@ -350,11 +342,11 @@ class AuthController extends Controller
     {
         $user = auth()->user();
 
-        if($user->is_company) {
+        if ($user->is_company) {
             $request->validate([
                 'fiscal_id' => 'required|string',
                 'document_picture_front_path' => 'required|file',
-                /*'document_picture' => 'required|file',*/
+                /* 'document_picture' => 'required|file', */
             ]);
         } else {
             $request->validate([
@@ -370,7 +362,7 @@ class AuthController extends Controller
         if ($request->has('document_picture_front_path')) {
             $photo = $request->file('document_picture_front_path');
 
-            $path = $photo->storePublicly(User::STORAGE_PATH . 'document/front/'. $user->id, [
+            $path = $photo->storePublicly(User::STORAGE_PATH . 'document/front/' . $user->id, [
                 'disk' => 'public',
             ]);
 
@@ -382,12 +374,11 @@ class AuthController extends Controller
 
             $user->images()->save($image);
         }
-
 
         if ($request->has('document_picture_back_path')) {
             $photo = $request->file('document_picture_back_path');
 
-            $path = $photo->storePublicly(User::STORAGE_PATH . 'document/back/'. $user->id, [
+            $path = $photo->storePublicly(User::STORAGE_PATH . 'document/back/' . $user->id, [
                 'disk' => 'public',
             ]);
             $attachEmail[] = $path;
@@ -399,25 +390,24 @@ class AuthController extends Controller
             $user->images()->save($image);
         }
 
-        //emviar un email a magui con los archivos.
+        // emviar un email a magui con los archivos.
         // info@scrapyapp.com
 
         $user->save();
 
-        SendEmail::dispatch(new ValidateEmail($user,$attachEmail));
+        SendEmail::dispatch(new ValidateEmail($user, $attachEmail));
 
         return response()->json([
-            'message' => 'Validación enviada correctamente'
+            'message' => 'Validación enviada correctamente',
         ], 200);
     }
-
 
     public function logout(Request $request): JsonResponse
     {
         $request->user()->token()->revoke();
 
         return response()->json([
-            'message' => '¡Se ha cerrado sesión correctamente!'
+            'message' => '¡Se ha cerrado sesión correctamente!',
         ]);
     }
 
@@ -437,7 +427,7 @@ class AuthController extends Controller
 
         if ($request->has('image')) {
             $photo = $request->file('image');
-            $path = $photo->storePublicly(User::STORAGE_PATH . 'profile/'. $user->id, [
+            $path = $photo->storePublicly(User::STORAGE_PATH . 'profile/' . $user->id, [
                 'disk' => 'public',
             ]);
 
@@ -447,22 +437,16 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Imagen actualizada'
+            'message' => 'Imagen actualizada',
         ]);
     }
 
-
-
-
     public function testmail(Request $request): JsonResponse
     {
-
         // $user = User::find(2);
         // SendEmail::dispatch(new WelcomeEmail($user));
-
 
         return response()->json([
         ], 201);
     }
-
 }

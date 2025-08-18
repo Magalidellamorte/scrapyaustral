@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Builder;
 
 class Offer extends Model
 {
@@ -78,7 +78,7 @@ class Offer extends Model
         return $this->hasMany(Postulation::class);
     }
 
-    public function torkies(): hasMany
+    public function torkies(): HasMany
     {
         return $this->hasMany(OfferTorky::class);
     }
@@ -103,7 +103,8 @@ class Offer extends Model
             ->where('user_id', auth()->user()->id ?? null);
     }
 
-    public function scopeInDistance(Builder $query, $distance, $latitude, $longitude) {
+    public function scopeInDistance(Builder $query, $distance, $latitude, $longitude)
+    {
         return $query->whereHas('address', function ($query) use ($distance, $latitude, $longitude) {
             $query->whereRaw("
                 (3959 * ACOS(COS(RADIANS($latitude))
