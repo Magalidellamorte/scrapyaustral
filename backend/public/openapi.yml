@@ -33,6 +33,779 @@ paths:
                     - id: 2
                       name: Donar
                       enabled: '1'
+
+  /auth/register:
+    post:
+      summary: Registro de usuario
+      tags:
+        - auth
+      description: |
+        Registra un nuevo usuario en la plataforma.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente envía los datos requeridos por POST a `/auth/register`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta a un método del controlador `AuthController` en `backend/app/Http/Controllers/Auth/AuthController.php`.
+        3. Antes de llegar al controlador, los datos pasan por una clase de validación ubicada en `backend/app/Http/Requests/`.
+        4. Si los datos son válidos, el controlador crea un nuevo usuario usando el modelo `User` (`backend/app/Models/User.php`).
+        5. El usuario se guarda en la base de datos y se puede enviar un email de bienvenida.
+        6. El backend responde con un JSON de éxito o error.
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - user_type
+                - first_name
+                - last_name
+                - email
+                - password
+                - whatsapp
+              properties:
+                user_type:
+                  type: string
+                  example: hogar
+                first_name:
+                  type: string
+                  example: Juan
+                last_name:
+                  type: string
+                  example: Pérez
+                email:
+                  type: string
+                  format: email
+                  example: juan@example.com
+                password:
+                  type: string
+                  format: password
+                  example: secret123
+                whatsapp:
+                  type: string
+                  example: "+5491122334455"
+                company_title:
+                  type: string
+                  example: "Mi Empresa S.A."
+                player_id:
+                  type: string
+                  example: "expoPushToken123"
+      responses:
+        '201':
+          description: Usuario creado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "¡Usuario creado correctamente!"
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Hubo un error al crear el usuario. Por favor, inténtelo nuevamente."
+        '422':
+          description: Error de validación de campos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+      x-explanation: |
+        **Flujo completo del endpoint /auth/register:**
+        - El cliente (por ejemplo, la app mobile) envía los datos del usuario.
+        - Laravel valida los datos usando una clase en `app/Http/Requests/`.
+        - Si todo es correcto, el controlador (`AuthController`) crea el usuario con el modelo `User`.
+        - El usuario se guarda en la base de datos (MySQL/PostgreSQL, según configuración en `backend/config/database.php`).
+        - Se responde con un mensaje de éxito o error.
+        - Si ocurre un error de validación, se responde con código 422 y detalles de los errores.
+
+  /auth/login:
+    post:
+      summary: Login de usuario
+      tags:
+        - auth
+      description: |
+        Autentica un usuario y retorna un token de acceso.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente envía email y password por POST a `/auth/login`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta a un método del controlador `AuthController` en `backend/app/Http/Controllers/Auth/AuthController.php`.
+        3. Antes de llegar al controlador, los datos pasan por una clase de validación ubicada en `backend/app/Http/Requests/`.
+        4. El controlador intenta autenticar al usuario usando el modelo `User` y el sistema de autenticación de Laravel.
+        5. Si las credenciales son correctas, se genera un token de acceso y se retorna al cliente.
+        6. Si las credenciales son incorrectas, se responde con error 401.
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: juan@example.com
+                password:
+                  type: string
+                  format: password
+                  example: secret123
+                player_id:
+                  type: string
+                  example: "expoPushToken123"
+                remember_me:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '422':
+          description: Error de validación de campos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+      x-explanation: |
+        **Flujo completo del endpoint /auth/login:**
+        - El cliente envía email y password.
+        - Laravel valida los datos usando una clase en `app/Http/Requests/`.
+        - El controlador (`AuthController`) intenta autenticar al usuario.
+        - Si es exitoso, se genera un token de acceso (usando Passport o Sanctum, según configuración) y se retorna al cliente.
+        - Si las credenciales son incorrectas, se responde con error 401.
+        - Si hay errores de validación, se responde con código 422 y detalles de los errores.
+
+  /offers:
+    get:
+      summary: Obtener listado de ofertas
+      tags:
+        - offers
+      description: |
+        Devuelve un listado paginado de ofertas (anuncios) según los filtros y el tipo de usuario.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/offers`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `index` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
+        3. El controlador utiliza el modelo `Offer` (`backend/app/Models/Offer.php`) y el filtro `OfferFilter` (`backend/app/ModelFilters/OfferFilter.php`) para aplicar los filtros recibidos por query params.
+        4. Se obtienen las ofertas desde la base de datos, se aplican relaciones y paginación.
+        5. Se retorna un JSON con la lista de ofertas y metadatos de paginación.
+
+      parameters:
+        - in: query
+          name: own
+          schema:
+            type: string
+            enum: [true, false]
+          description: Si es 'true', devuelve solo las ofertas del usuario autenticado.
+        - in: query
+          name: offer_type_id
+          schema:
+            type: integer
+          description: Filtrar por tipo de oferta.
+        - in: query
+          name: category_id
+          schema:
+            type: integer
+          description: Filtrar por categoría.
+        - in: query
+          name: condition_id
+          schema:
+            type: integer
+          description: Filtrar por condición.
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Buscar por título o descripción.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Número de página para paginación.
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Listado de ofertas paginado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Offer'
+                  meta:
+                    type: object
+                    description: Metadatos de paginación
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /offers:**
+        - El cliente envía una petición GET con los filtros deseados.
+        - El backend aplica los filtros usando el filtro `OfferFilter` y el modelo `Offer`.
+        - Se obtienen las ofertas desde la base de datos y se devuelven paginadas.
+        - Si el usuario no está autenticado, se responde con 401.
+
+    post:
+      summary: Crear una nueva oferta (anuncio)
+      tags:
+        - offers
+      description: |
+        Permite a un usuario crear una nueva oferta (anuncio) en la plataforma. Se pueden adjuntar imágenes y se deben enviar varios datos obligatorios.
+
+        **Gestión de imágenes:**
+        - Existe una entidad (modelo y tabla) llamada `Image` en el backend, que representa cada imagen asociada a una oferta.
+        - Cada oferta puede tener varias imágenes, y esta relación se gestiona en la base de datos (relación uno a muchos entre Offer e Image).
+        - Cuando un usuario sube imágenes al crear una oferta, los archivos de imagen se almacenan localmente en la carpeta `storage/app/public` del proyecto.
+        - En la base de datos solo se guarda la ruta (path) y metadatos de la imagen, no el archivo en sí.
+        - Las imágenes quedan accesibles desde la carpeta pública del proyecto y no se almacenan directamente en la base de datos.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente envía los datos requeridos por POST a `/offers` (incluyendo imágenes si corresponde).
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `store` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
+        3. Antes de llegar al controlador, los datos pasan por la clase de validación `CreateOfferRequest` (`backend/app/Http/Requests/CreateOfferRequest.php`).
+        4. Si los datos son válidos, el controlador crea un nuevo registro en la tabla `offers` usando el modelo `Offer` (`backend/app/Models/Offer.php`).
+        5. Se crean las relaciones con categorías, dirección, imágenes, etc.
+        6. Se envía una notificación y un email.
+        7. El backend responde con un JSON de éxito o error.
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - offer_type_id
+                - category_id
+                - condition_id
+                - title
+                - description
+                - quantity
+                - measure_type_id
+                - address.street
+                - address.street_number
+              properties:
+                offer_type_id:
+                  type: integer
+                  example: 1
+                category_id:
+                  type: integer
+                  example: 2
+                condition_id:
+                  type: integer
+                  example: 1
+                title:
+                  type: string
+                  example: "Cartón para reciclar"
+                description:
+                  type: string
+                  example: "Cartón limpio, listo para retirar."
+                quantity:
+                  type: string
+                  example: "10"
+                measure_type_id:
+                  type: integer
+                  example: 1
+                value_with_shipping:
+                  type: integer
+                  example: 1000
+                value_without_shipping:
+                  type: integer
+                  example: 800
+                pick_by_scraper:
+                  type: boolean
+                  example: true
+                send_by_donor:
+                  type: boolean
+                  example: false
+                address.street:
+                  type: string
+                  example: "Av. Siempre Viva"
+                address.street_number:
+                  type: string
+                  example: "742"
+                address.postal_code:
+                  type: string
+                  example: "1000"
+                address.floor:
+                  type: string
+                  example: "1"
+                address.apartment:
+                  type: string
+                  example: "A"
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Imágenes adjuntas (opcional)
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '201':
+          description: Oferta creada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Publicaciòn creada correctamente"
+        '400':
+          description: Error de validación o negocio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Hubo un error al crear la publicación. Por favor, inténtelo nuevamente."
+        '422':
+          description: Error de validación de campos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The given data was invalid."
+                  errors:
+                    type: object
+      x-explanation: |
+        **Flujo completo del endpoint /offers (POST):**
+        - El cliente envía los datos del anuncio y las imágenes.
+        - Laravel valida los datos usando la clase `CreateOfferRequest`.
+        - El controlador (`OfferController`) crea el anuncio y sus relaciones (categoría, dirección, imágenes).
+        - Se guarda todo en la base de datos.
+        - Se envía una notificación y un email.
+        - Se responde con un mensaje de éxito o error.
+        - Si ocurre un error de validación, se responde con código 422 y detalles de los errores.
+
+  /offers/{offerId}:
+    get:
+      summary: Obtener detalle de una oferta
+      tags:
+        - offers
+      description: |
+        Devuelve el detalle completo de una oferta (anuncio) específica.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/offers/{offerId}`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `show` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
+        3. El controlador carga la oferta y sus relaciones desde la base de datos.
+        4. Se retorna un JSON con todos los datos de la oferta.
+
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: integer
+          description: ID de la oferta a consultar.
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Detalle de la oferta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Oferta no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Not Found"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /offers/{offerId}:**
+        - El cliente envía una petición GET con el ID de la oferta.
+        - El backend busca la oferta y sus relaciones en la base de datos.
+        - Si existe, retorna el detalle; si no, responde 404.
+        - Si el usuario no está autenticado, responde 401.
+
+  /postulations:
+    get:
+      summary: Obtener postulaciones del usuario
+      tags:
+        - postulations
+      description: |
+        Devuelve un listado paginado de las postulaciones (ofertas a las que el usuario se postuló).
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/postulations`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `index` del controlador `PostulationController` (`backend/app/Http/Controllers/PostulationController.php`).
+        3. El controlador utiliza el modelo `Postulation` y aplica filtros según el usuario autenticado.
+        4. Se obtienen las postulaciones desde la base de datos y se devuelven paginadas.
+
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Número de página para paginación.
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Listado de postulaciones paginado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Postulation'
+                  meta:
+                    type: object
+                    description: Metadatos de paginación
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /postulations:**
+        - El cliente envía una petición GET.
+        - El backend filtra las postulaciones por el usuario autenticado.
+        - Se devuelven las postulaciones paginadas.
+        - Si el usuario no está autenticado, responde 401.
+
+  /offers/{offerId}/postulations:
+    get:
+      summary: Obtener postulaciones de un anuncio
+      tags:
+        - postulations
+      description: |
+        Devuelve un listado de postulaciones para un anuncio específico (solo accesible por el dueño del anuncio).
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/offers/{offerId}/postulations`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `index` del controlador `PostulationController` (`backend/app/Http/Controllers/PostulationController.php`).
+        3. El controlador filtra las postulaciones por el ID del anuncio y el usuario autenticado.
+        4. Se obtienen las postulaciones desde la base de datos y se devuelven paginadas.
+
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: integer
+          description: ID del anuncio (oferta) a consultar.
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Listado de postulaciones del anuncio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Postulation'
+                  meta:
+                    type: object
+                    description: Metadatos de paginación
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '403':
+          description: Prohibido (no es el dueño del anuncio)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden"
+      x-explanation: |
+        **Flujo completo del endpoint /offers/{offerId}/postulations:**
+        - El cliente envía una petición GET con el ID del anuncio.
+        - El backend filtra las postulaciones por ese anuncio y verifica que el usuario sea el dueño.
+        - Se devuelven las postulaciones paginadas.
+        - Si el usuario no es el dueño, responde 403. Si no está autenticado, responde 401.
+
+  /notifications:
+    get:
+      summary: Obtener notificaciones del usuario
+      tags:
+        - notifications
+      description: |
+        Devuelve la lista de notificaciones del usuario autenticado, ordenadas por fecha de creación (más recientes primero).
+
+        **¿Cuándo se crean las notificaciones?**
+        - Las notificaciones se generan automáticamente en el backend cuando ocurren eventos importantes en la plataforma, como:
+          - Cuando un usuario se postula a un anuncio, el dueño del anuncio recibe una notificación.
+          - Cuando una postulación es aceptada o rechazada, el usuario que se postuló recibe una notificación.
+          - Cuando una postulación es cancelada o finalizada, los usuarios involucrados reciben notificaciones.
+          - Cuando se crea una nueva oferta, los usuarios interesados pueden recibir notificaciones.
+          - Cuando un usuario realiza una pregunta sobre una oferta, el dueño recibe una notificación.
+          - Cuando un torky es asignado o completa un retiro, se notifican los usuarios correspondientes.
+        - Técnicamente, estas notificaciones se crean en los controladores del backend (por ejemplo, `OfferController`, `PostulationController`) usando el servicio `ExpoNotification`, que guarda el registro en la base de datos y, si corresponde, envía una notificación push al dispositivo del usuario.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/notifications`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `index` del controlador `NotificationController` (`backend/app/Http/Controllers/NotificationController.php`).
+        3. El controlador obtiene las notificaciones del usuario autenticado usando la relación `notifications` del modelo `User`.
+        4. Se retorna un JSON con la lista de notificaciones.
+        5. Cada notificación es un registro en la tabla `notifications` de la base de datos.
+
+        **Notas:**
+        - Las notificaciones se generan automáticamente cuando ocurren eventos importantes (por ejemplo, una oferta aceptada, un mensaje nuevo, etc.).
+        - El backend utiliza la clase `ExpoNotification` para enviar notificaciones push y guardar el registro en la base de datos.
+
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Listado de notificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /notifications:**
+        - El cliente envía una petición GET.
+        - El backend obtiene las notificaciones del usuario autenticado desde la base de datos.
+        - Se devuelven todas las notificaciones ordenadas por fecha.
+        - Si el usuario no está autenticado, responde 401.
+
+  /notifications/read_all:
+    post:
+      summary: Marcar todas las notificaciones como leídas
+      tags:
+        - notifications
+      description: |
+        Marca todas las notificaciones del usuario autenticado como leídas (actualiza el campo `read_at` en la base de datos).
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición POST a `/notifications/read_all`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `readAll` del controlador `NotificationController` (`backend/app/Http/Controllers/NotificationController.php`).
+        3. El controlador busca todas las notificaciones no leídas del usuario autenticado y actualiza el campo `read_at` con la fecha actual.
+        4. Se retorna un JSON vacío como confirmación.
+
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Notificaciones marcadas como leídas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /notifications/read_all:**
+        - El cliente envía una petición POST.
+        - El backend actualiza el campo `read_at` de todas las notificaciones no leídas del usuario autenticado.
+        - Se responde con un JSON vacío.
+        - Si el usuario no está autenticado, responde 401.
+
+  /notifications/count:
+    get:
+      summary: Obtener cantidad de notificaciones no leídas
+      tags:
+        - notifications
+      description: |
+        Devuelve la cantidad de notificaciones no leídas del usuario autenticado.
+
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente hace una petición GET a `/notifications/count`.
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `count` del controlador `NotificationController` (`backend/app/Http/Controllers/NotificationController.php`).
+        3. El controlador cuenta las notificaciones del usuario autenticado donde el campo `read_at` es nulo.
+        4. Se retorna un JSON con la cantidad de no leídas.
+
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Token de autenticación Bearer.
+      responses:
+        '200':
+          description: Cantidad de notificaciones no leídas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 3
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+      x-explanation: |
+        **Flujo completo del endpoint /notifications/count:**
+        - El cliente envía una petición GET.
+        - El backend cuenta las notificaciones no leídas del usuario autenticado en la base de datos.
+        - Se responde con la cantidad encontrada.
+        - Si el usuario no está autenticado, responde 401.
+
 components:
   schemas:
     OfferType:
@@ -48,4 +821,38 @@ components:
           type: string
           description: Indicador de habilitación ("1" = habilitado)
           example: '1'
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        player_id:
+          type: string
+          example: "ExponentPushToken[xxxxxx]"
+        title:
+          type: string
+          example: "¡Han aceptado tu postulación!"
+        message:
+          type: string
+          example: "Tu postulación para Cartón limpio fue aceptada"
+        goTo:
+          type: string
+          example: "ViewOwnOffer"
+        goToParams:
+          type: string
+          example: '{"id": 123}'
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
