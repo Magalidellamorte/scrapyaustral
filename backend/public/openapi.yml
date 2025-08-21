@@ -9,6 +9,440 @@ servers:
   - url: http://localhost:8000/api
     description: Entorno local (Docker / php artisan serve)
 paths:
+  /offers:
+    get:
+      summary: Obtener lista de anuncios
+      description: >-
+        Devuelve una lista paginada de anuncios filtrable por múltiples criterios.
+        Permite filtrar por categorías, estados, tipos, condiciones, búsqueda por texto,
+        mostrar solo anuncios propios o de otros usuarios, y aplicar filtros específicos
+        para usuarios tipo "torky".
+      tags:
+        - offers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: own
+          in: query
+          description: >-
+            Filtrar anuncios propios o de otros usuarios.
+            "true" = solo anuncios del usuario autenticado,
+            "false" = solo anuncios de otros usuarios
+          schema:
+            type: string
+            enum: [true, false]
+          example: "false"
+        - name: view
+          in: query
+          description: >-
+            Vista especial. "last_offers" excluye anuncios del usuario autenticado
+          schema:
+            type: string
+            enum: [last_offers]
+          example: "last_offers"
+        - name: categories
+          in: query
+          description: Lista de IDs de categorías separados por coma
+          schema:
+            type: string
+          example: "1,2,3"
+        - name: offerTypes
+          in: query
+          description: Lista de IDs de tipos de oferta separados por coma
+          schema:
+            type: string
+          example: "1,2"
+        - name: offerStatuses
+          in: query
+          description: Lista de IDs de estados de oferta separados por coma
+          schema:
+            type: string
+          example: "1,2,3"
+        - name: conditions
+          in: query
+          description: Lista de IDs de condiciones separados por coma
+          schema:
+            type: string
+          example: "1,2"
+        - name: search
+          in: query
+          description: Término de búsqueda para filtrar por título o descripción
+          schema:
+            type: string
+          example: "cartón reciclable"
+        - name: page
+          in: query
+          description: Número de página para paginación
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+        - name: limit
+          in: query
+          description: Número de elementos por página (solo para usuarios torky)
+          schema:
+            type: integer
+          example: 1000
+      responses:
+        '200':
+          description: Lista de anuncios obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaginatedOffers'
+              examples:
+                example_success:
+                  value:
+                    - current_page: 1
+                      data:
+                        - id: 1
+                          title: "Vendo cartón en buen estado"
+                          description: "Cartón limpio y seco, ideal para reciclaje"
+                          quantity: "50"
+                          user_id: 123
+                          category_id: 1
+                          offer_type_id: 1
+                          offer_status_id: 1
+                          condition_id: 1
+                          measure_type_id: 2
+                          value_with_shipping: "500"
+                          value_without_shipping: "400"
+                          pick_by_scraper: true
+                          send_by_client: false
+                          valid_until: "2024-02-15T10:30:00Z"
+                          created_at: "2024-01-15T10:30:00Z"
+                          updated_at: "2024-01-15T10:30:00Z"
+                          user:
+                            id: 123
+                            first_name: "Juan"
+                            last_name: "Pérez"
+                            full_name: "Juan Pérez"
+                            type: "scraper"
+                          category:
+                            id: 1
+                            name: "Cartón"
+                          offer_type:
+                            id: 1
+                            name: "Vender"
+                          offer_status:
+                            id: 1
+                            name: "Pendiente"
+                          condition:
+                            id: 1
+                            name: "Nuevo"
+                          measure_type:
+                            id: 2
+                            name: "Kilogramos"
+                          address:
+                            street: "Av. Corrientes 1234"
+                            neighborhood: "San Nicolás"
+                            city: "Buenos Aires"
+                            province: "Buenos Aires"
+                          images:
+                            - id: 1
+                              path: "images/offer/1/xyz123.jpg"
+                              bytes: 245760
+                          postulations: []
+                          rating: []
+                      first_page_url: "http://localhost:8000/api/offers?page=1"
+                      from: 1
+                      last_page: 3
+                      last_page_url: "http://localhost:8000/api/offers?page=3"
+                      next_page_url: "http://localhost:8000/api/offers?page=2"
+                      path: "http://localhost:8000/api/offers"
+                      per_page: 15
+                      prev_page_url: null
+                      to: 15
+                      total: 45
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    message: "Unauthenticated."
+        '422':
+          description: Error de validación en parámetros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /offers/{id}:
+    get:
+      summary: Obtener anuncio específico
+      description: >-
+        Devuelve los detalles completos de un anuncio específico incluyendo
+        sus relaciones (categorías, usuario, imágenes, postulaciones, etc.).
+      tags:
+        - offers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único del anuncio
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Anuncio obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+              examples:
+                example_success:
+                  value:
+                    id: 1
+                    title: "Vendo cartón en buen estado"
+                    description: "Cartón limpio y seco, ideal para reciclaje"
+                    quantity: "50"
+                    user_id: 123
+                    category_id: 1
+                    offer_type_id: 1
+                    offer_status_id: 1
+                    condition_id: 1
+                    measure_type_id: 2
+                    value_with_shipping: "500"
+                    value_without_shipping: "400"
+                    pick_by_scraper: true
+                    send_by_client: false
+                    valid_until: "2024-02-15T10:30:00Z"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:30:00Z"
+                    user:
+                      id: 123
+                      first_name: "Juan"
+                      last_name: "Pérez"
+                      full_name: "Juan Pérez"
+                      type: "scraper"
+                    category:
+                      id: 1
+                      name: "Cartón"
+                    offer_type:
+                      id: 1
+                      name: "Vender"
+                    offer_status:
+                      id: 1
+                      name: "Pendiente"
+                    condition:
+                      id: 1
+                      name: "Nuevo"
+                    measure_type:
+                      id: 2
+                      name: "Kilogramos"
+                    address:
+                      street: "Av. Corrientes 1234"
+                      neighborhood: "San Nicolás"
+                      city: "Buenos Aires"
+                      province: "Buenos Aires"
+                    images:
+                      - id: 1
+                        path: "images/offer/1/xyz123.jpg"
+                        bytes: 245760
+                    offer_categories:
+                      - id: 1
+                        name: "Cartón"
+                        pivot:
+                          measure_type_id: 2
+                          quantity: 50
+                          condition_id: 1
+                    torkies:
+                      - id: 1
+                        user_id: 456
+                        offer_id: 1
+                        expected_start_pickup_at: "2024-01-20T08:00:00Z"
+                        expected_end_pickup_at: "2024-01-20T10:00:00Z"
+                        user:
+                          id: 456
+                          first_name: "María"
+                          last_name: "García"
+                          type: "torky"
+                    postulations: []
+                    rating: []
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                not_found:
+                  value:
+                    message: "No query results for model [App\\Models\\Offer] 1"
+
+  /offers/{offer}/close:
+    post:
+      summary: Cerrar un anuncio
+      description: >-
+        Permite al propietario de un anuncio cerrarlo, especificando un motivo.
+        Al cerrar un anuncio, todas las postulaciones pendientes o aceptadas
+        son rechazadas automáticamente y se notifica a los postulantes.
+      tags:
+        - offers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          description: ID del anuncio a cerrar
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reasonId
+              properties:
+                reasonId:
+                  type: integer
+                  description: ID del motivo de cierre (ver /closed_reasons)
+                  example: 1
+            examples:
+              example_request:
+                value:
+                  reasonId: 1
+      responses:
+        '200':
+          description: Anuncio cerrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "¡Anuncio cerrado correctamente!"
+        '400':
+          description: Error - El anuncio ya está cerrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_closed:
+                  value:
+                    success: false
+                    message: "El anuncio ya ha sido finalizado"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Prohibido - Solo el propietario puede cerrar el anuncio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /offers/{offer}/ask_question:
+    post:
+      summary: Hacer una pregunta sobre un anuncio
+      description: >-
+        Permite a un usuario autenticado hacer una pregunta sobre un anuncio.
+        Solo se permite una pregunta por usuario por anuncio. Si el usuario
+        ya hizo una pregunta, debe usar el chat para preguntas adicionales.
+        Se crea un mensaje destacado en el chat y se notifica al propietario.
+      tags:
+        - offers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          description: ID del anuncio sobre el que se pregunta
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+              properties:
+                question:
+                  type: string
+                  description: Texto de la pregunta
+                  maxLength: 1000
+                  example: "¿El cartón está completamente limpio? ¿Incluye transporte?"
+            examples:
+              example_request:
+                value:
+                  question: "¿El cartón está completamente limpio? ¿Incluye transporte?"
+      responses:
+        '200':
+          description: Pregunta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "Tu consulta se ha creado correctamente"
+        '400':
+          description: Error - El usuario ya hizo una pregunta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_asked:
+                  value:
+                    success: false
+                    message: "¡Si tienes mas preguntas puedes usar el chat!"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
   /offer_types:
     get:
       summary: Lista de tipos de oferta
@@ -34,7 +468,234 @@ paths:
                       name: Donar
                       enabled: '1'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de autenticación JWT obtenido del endpoint /auth/login
+
   schemas:
+    Offer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Vendo cartón en buen estado"
+        description:
+          type: string
+          nullable: true
+          example: "Cartón limpio y seco, ideal para reciclaje"
+        quantity:
+          type: string
+          nullable: true
+          example: "50"
+        user_id:
+          type: integer
+          example: 123
+        category_id:
+          type: integer
+          nullable: true
+          example: 1
+        offer_type_id:
+          type: integer
+          nullable: true
+          example: 1
+        offer_status_id:
+          type: integer
+          nullable: true
+          example: 1
+        condition_id:
+          type: integer
+          nullable: true
+          example: 1
+        measure_type_id:
+          type: integer
+          nullable: true
+          example: 2
+        value_with_shipping:
+          type: string
+          nullable: true
+          example: "500"
+        value_without_shipping:
+          type: string
+          nullable: true
+          example: "400"
+        pick_by_scraper:
+          type: boolean
+          example: true
+        send_by_client:
+          type: boolean
+          example: false
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-02-15T10:30:00Z"
+        torky_pickup_at:
+          type: string
+          format: date
+          nullable: true
+          example: "2024-01-20"
+        torky_pickup_range:
+          type: string
+          nullable: true
+          example: "8 a 10"
+        closed_reason_id:
+          type: integer
+          nullable: true
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        user:
+          $ref: '#/components/schemas/User'
+        category:
+          $ref: '#/components/schemas/Category'
+        offer_type:
+          $ref: '#/components/schemas/OfferType'
+        offer_status:
+          $ref: '#/components/schemas/OfferStatus'
+        condition:
+          $ref: '#/components/schemas/Condition'
+        measure_type:
+          $ref: '#/components/schemas/MeasureType'
+        address:
+          $ref: '#/components/schemas/Address'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        offer_categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryWithPivot'
+        torkies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferTorky'
+        postulations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Postulation'
+        rating:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rating'
+
+    PaginatedOffers:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Offer'
+        first_page_url:
+          type: string
+          example: "http://localhost:8000/api/offers?page=1"
+        from:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 3
+        last_page_url:
+          type: string
+          example: "http://localhost:8000/api/offers?page=3"
+        next_page_url:
+          type: string
+          nullable: true
+          example: "http://localhost:8000/api/offers?page=2"
+        path:
+          type: string
+          example: "http://localhost:8000/api/offers"
+        per_page:
+          type: integer
+          example: 15
+        prev_page_url:
+          type: string
+          nullable: true
+          example: null
+        to:
+          type: integer
+          example: 15
+        total:
+          type: integer
+          example: 45
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        first_name:
+          type: string
+          example: "Juan"
+        last_name:
+          type: string
+          example: "Pérez"
+        full_name:
+          type: string
+          example: "Juan Pérez"
+        email:
+          type: string
+          format: email
+          example: "juan.perez@email.com"
+        type:
+          type: string
+          enum: [scraper, hogar, torky, admin_localidad]
+          example: "scraper"
+        phone:
+          type: string
+          nullable: true
+          example: "+54911234567"
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Cartón"
+        enabled:
+          type: boolean
+          example: true
+
+    CategoryWithPivot:
+      allOf:
+        - $ref: '#/components/schemas/Category'
+        - type: object
+          properties:
+            pivot:
+              type: object
+              properties:
+                measure_type_id:
+                  type: integer
+                  nullable: true
+                  example: 2
+                quantity:
+                  type: integer
+                  nullable: true
+                  example: 50
+                condition_id:
+                  type: integer
+                  nullable: true
+                  example: 1
+
     OfferType:
       type: object
       properties:
@@ -43,9 +704,212 @@ components:
           example: 1
         name:
           type: string
-          example: Vender
+          example: "Vender"
         enabled:
           type: string
           description: Indicador de habilitación ("1" = habilitado)
           example: '1'
+
+    OfferStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Pendiente"
+
+    Condition:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Nuevo"
+
+    MeasureType:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: "Kilogramos"
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        street:
+          type: string
+          example: "Av. Corrientes 1234"
+        number:
+          type: string
+          nullable: true
+          example: "1234"
+        floor:
+          type: string
+          nullable: true
+          example: "2"
+        apartment:
+          type: string
+          nullable: true
+          example: "A"
+        neighborhood:
+          type: string
+          example: "San Nicolás"
+        city:
+          type: string
+          example: "Buenos Aires"
+        province:
+          type: string
+          example: "Buenos Aires"
+        latitude:
+          type: number
+          format: float
+          nullable: true
+          example: -34.6037389
+        longitude:
+          type: number
+          format: float
+          nullable: true
+          example: -58.3837591
+
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        path:
+          type: string
+          example: "images/offer/1/xyz123.jpg"
+        bytes:
+          type: integer
+          example: 245760
+
+    OfferTorky:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 456
+        offer_id:
+          type: integer
+          example: 1
+        expected_start_pickup_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-20T08:00:00Z"
+        expected_end_pickup_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-01-20T10:00:00Z"
+        user:
+          $ref: '#/components/schemas/User'
+
+    Postulation:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 789
+        offer_id:
+          type: integer
+          example: 1
+        offer_status_id:
+          type: integer
+          example: 1
+        message:
+          type: string
+          nullable: true
+          example: "Me interesa este material"
+
+    Rating:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 123
+        scraper_id:
+          type: integer
+          example: 789
+        client_id:
+          type: integer
+          example: 123
+        offer_id:
+          type: integer
+          example: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        message:
+          type: string
+          nullable: true
+          example: "Excelente transacción"
+        pending:
+          type: boolean
+          example: false
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operación exitosa"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Descripción del error"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error description"
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The given data was invalid."
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            question:
+              - "The question field is required."
 
