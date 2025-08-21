@@ -168,6 +168,156 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+    post:
+      summary: Crear un nuevo anuncio
+      description: >-
+        Permite crear un nuevo anuncio de material reciclable. Incluye validación
+        completa de datos, manejo de imágenes múltiples con redimensionamiento automático,
+        creación de dirección con datos geográficos dinámicos, y notificaciones
+        automáticas a usuarios interesados en la categoría.
+        **¿Cómo funciona este endpoint internamente?**
+        1. El cliente envía los datos requeridos por POST a `/offers` (incluyendo imágenes si corresponde).
+        2. La ruta está definida en `backend/routes/api.php` y apunta al método `store` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
+        3. Antes de llegar al controlador, los datos pasan por la clase de validación `CreateOfferRequest` (`backend/app/Http/Requests/CreateOfferRequest.php`).
+        4. Si los datos son válidos, el controlador crea un nuevo registro en la tabla `offers` usando el modelo `Offer` (`backend/app/Models/Offer.php`).
+        5. Se crean las relaciones con categorías, dirección, imágenes, etc.
+        6. Se envía una notificación y un email.
+        7. El backend responde con un JSON de éxito o error.
+      tags:
+        - offers
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - offer_type_id
+                - category_id
+                - condition_id
+                - title
+                - description
+                - quantity
+                - measure_type_id
+              properties:
+                offer_type_id:
+                  type: integer
+                  description: ID del tipo de oferta (ver /offer_types)
+                  example: 1
+                category_id:
+                  type: integer
+                  description: ID de la categoría del material (ver /categories)
+                  example: 1
+                condition_id:
+                  type: integer
+                  description: ID de la condición del material (ver /conditions)
+                  example: 1
+                title:
+                  type: string
+                  example: "Cartón para reciclar"
+                description:
+                  type: string
+                  example: "Cartón limpio, listo para retirar."
+                quantity:
+                  type: string
+                  example: "10"
+                measure_type_id:
+                  type: integer
+                  example: 1
+                value_with_shipping:
+                  type: integer
+                  example: 1000
+                value_without_shipping:
+                  type: integer
+                  description: Precio sin envío (opcional, solo para ofertas de venta)
+                  example: 400
+                pick_by_scraper:
+                  type: string
+                  enum: [ true, false ]
+                  description: Si el scraper puede recoger el material
+                  example: "true"
+                pick_by_donor:
+                  type: string
+                  enum: [ true, false ]
+                  description: Si el donante puede enviar el material
+                  example: "false"
+                address[street]:
+                  type: string
+                  maxLength: 255
+                  description: Nombre de la calle
+                  example: "Av. Corrientes"
+                address[street_number]:
+                  type: string
+                  example: "1"
+                address[apartment]:
+                  type: string
+                  example: "A"
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Imágenes adjuntas (opcional)
+      responses:
+        '200':
+          description: Anuncio creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "Publicaciòn creada correctamente"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  value:
+                    message: "Unauthenticated."
+        '422':
+          description: Error de validación en los datos enviados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                validation_error:
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      title:
+                        - "The title field is required."
+                      category_id:
+                        - "The selected category id is invalid."
+                      address.street:
+                        - "The address.street field is required."
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                server_error:
+                  value:
+                    message: "Internal server error during image processing or email notification"
+      x-explanation: |
+        **Flujo completo del endpoint /offers (POST):**
+        - El cliente envía los datos del anuncio y las imágenes.
+        - Laravel valida los datos usando la clase `CreateOfferRequest`.
+        - El controlador (`OfferController`) crea el anuncio y sus relaciones (categoría, dirección, imágenes).
+        - Se guarda todo en la base de datos.
+        - Se envía una notificación y un email.
+        - Se responde con un mensaje de éxito o error.
+        - Si ocurre un error de validación, se responde con código 422 y detalles de los errores.
 
   /offers/{id}:
     get:
@@ -438,227 +588,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-    post:
-      summary: Crear un nuevo anuncio
-      description: >-
-        Permite crear un nuevo anuncio de material reciclable. Incluye validación
-        completa de datos, manejo de imágenes múltiples con redimensionamiento automático,
-        creación de dirección con datos geográficos dinámicos, y notificaciones
-        automáticas a usuarios interesados en la categoría.
-      tags:
-        - offers
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - offer_type_id
-                - category_id
-                - condition_id
-                - title
-                - description
-                - quantity
-                - measure_type_id
-                - address[street]
-                - address[street_number]
-              properties:
-                offer_type_id:
-                  type: integer
-                  description: ID del tipo de oferta (ver /offer_types)
-                  example: 1
-                category_id:
-                  type: integer
-                  description: ID de la categoría del material (ver /categories)
-                  example: 1
-                condition_id:
-                  type: integer
-                  description: ID de la condición del material (ver /conditions)
-                  example: 1
-                title:
-                  type: string
-                  maxLength: 255
-                  description: Título del anuncio
-                  example: "Vendo cartón en excelente estado"
-                description:
-                  type: string
-                  maxLength: 2000
-                  description: Descripción detallada del material
-                  example: "Cartón limpio y seco, ideal para reciclaje. Proveniente de embalajes de productos electrónicos."
-                quantity:
-                  type: string
-                  maxLength: 2000
-                  description: Cantidad disponible del material
-                  example: "50"
-                measure_type_id:
-                  type: integer
-                  description: ID del tipo de medida (ver /measure_types)
-                  example: 2
-                value_with_shipping:
-                  type: integer
-                  description: Precio con envío (opcional, solo para ofertas de venta)
-                  example: 500
-                value_without_shipping:
-                  type: integer
-                  description: Precio sin envío (opcional, solo para ofertas de venta)
-                  example: 400
-                pick_by_scraper:
-                  type: string
-                  enum: [ true, false ]
-                  description: Si el scraper puede recoger el material
-                  example: "true"
-                pick_by_donor:
-                  type: string
-                  enum: [ true, false ]
-                  description: Si el donante puede enviar el material
-                  example: "false"
-                address[street]:
-                  type: string
-                  maxLength: 255
-                  description: Nombre de la calle
-                  example: "Av. Corrientes"
-                address[street_number]:
-                  type: string
-                  maxLength: 255
-                  description: Número de la dirección
-                  example: "1234"
-                address[postal_code]:
-                  type: string
-                  maxLength: 255
-                  description: Código postal (opcional)
-                  example: "C1043AAZ"
-                address[floor]:
-                  type: string
-                  maxLength: 255
-                  description: Piso (opcional)
-                  example: "2"
-                address[apartment]:
-                  type: string
-                  maxLength: 255
-                  description: Departamento (opcional)
-                  example: "A"
-                address[latitude]:
-                  type: number
-                  format: float
-                  description: Latitud geográfica (opcional)
-                  example: -34.6037389
-                address[longitude]:
-                  type: number
-                  format: float
-                  description: Longitud geográfica (opcional)
-                  example: -58.3837591
-                address[province]:
-                  type: string
-                  description: Nombre de la provincia (se crea automáticamente si no existe)
-                  example: "Buenos Aires"
-                address[city]:
-                  type: string
-                  description: Nombre de la ciudad (se crea automáticamente si no existe)
-                  example: "Buenos Aires"
-                address[neighborhood]:
-                  type: string
-                  description: Nombre del barrio (se crea automáticamente si no existe)
-                  example: "San Nicolás"
-                images[0]:
-                  type: string
-                  format: binary
-                  description: Primera imagen del anuncio (opcional)
-                images[1]:
-                  type: string
-                  format: binary
-                  description: Segunda imagen del anuncio (opcional)
-                images[2]:
-                  type: string
-                  format: binary
-                  description: Tercera imagen del anuncio (opcional)
-            examples:
-              example_venta:
-                summary: Anuncio de venta
-                value:
-                  offer_type_id: 1
-                  category_id: 1
-                  condition_id: 1
-                  title: "Vendo cartón en excelente estado"
-                  description: "Cartón limpio y seco, ideal para reciclaje"
-                  quantity: "50"
-                  measure_type_id: 2
-                  value_with_shipping: 500
-                  value_without_shipping: 400
-                  pick_by_scraper: "true"
-                  pick_by_donor: "false"
-                  address[street]: "Av. Corrientes"
-                  address[street_number]: "1234"
-                  address[province]: "Buenos Aires"
-                  address[city]: "Buenos Aires"
-                  address[neighborhood]: "San Nicolás"
-              example_donacion:
-                summary: Anuncio de donación
-                value:
-                  offer_type_id: 2
-                  category_id: 3
-                  condition_id: 2
-                  title: "Dono plásticos varios"
-                  description: "Botellas de plástico limpias y tapitas"
-                  quantity: "20"
-                  measure_type_id: 1
-                  pick_by_scraper: "true"
-                  pick_by_donor: "false"
-                  address[street]: "San Martín"
-                  address[street_number]: "567"
-                  address[province]: "Córdoba"
-                  address[city]: "Córdoba"
-      responses:
-        '200':
-          description: Anuncio creado exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-              examples:
-                success:
-                  value:
-                    success: true
-                    message: "Publicaciòn creada correctamente"
-        '401':
-          description: No autorizado - Token inválido o ausente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                unauthorized:
-                  value:
-                    message: "Unauthenticated."
-        '422':
-          description: Error de validación en los datos enviados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-              examples:
-                validation_error:
-                  value:
-                    message: "The given data was invalid."
-                    errors:
-                      title:
-                        - "The title field is required."
-                      category_id:
-                        - "The selected category id is invalid."
-                      address.street:
-                        - "The address.street field is required."
-        '500':
-          description: Error interno del servidor
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              examples:
-                server_error:
-                  value:
-                    message: "Internal server error during image processing or email notification"
 
   /offer_types:
     get:
@@ -876,241 +805,6 @@ paths:
         - Si las credenciales son incorrectas, se responde con error 401.
         - Si hay errores de validación, se responde con código 422 y detalles de los errores.
 
-  /offers:
-    get:
-      summary: Obtener listado de ofertas
-      tags:
-        - offers
-      description: |
-        Devuelve un listado paginado de ofertas (anuncios) según los filtros y el tipo de usuario.
-
-        **¿Cómo funciona este endpoint internamente?**
-        1. El cliente hace una petición GET a `/offers`.
-        2. La ruta está definida en `backend/routes/api.php` y apunta al método `index` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
-        3. El controlador utiliza el modelo `Offer` (`backend/app/Models/Offer.php`) y el filtro `OfferFilter` (`backend/app/ModelFilters/OfferFilter.php`) para aplicar los filtros recibidos por query params.
-        4. Se obtienen las ofertas desde la base de datos, se aplican relaciones y paginación.
-        5. Se retorna un JSON con la lista de ofertas y metadatos de paginación.
-
-      parameters:
-        - in: query
-          name: own
-          schema:
-            type: string
-            enum: [true, false]
-          description: Si es 'true', devuelve solo las ofertas del usuario autenticado.
-        - in: query
-          name: offer_type_id
-          schema:
-            type: integer
-          description: Filtrar por tipo de oferta.
-        - in: query
-          name: category_id
-          schema:
-            type: integer
-          description: Filtrar por categoría.
-        - in: query
-          name: condition_id
-          schema:
-            type: integer
-          description: Filtrar por condición.
-        - in: query
-          name: search
-          schema:
-            type: string
-          description: Buscar por título o descripción.
-        - in: query
-          name: page
-          schema:
-            type: integer
-          description: Número de página para paginación.
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-          description: Token de autenticación Bearer.
-      responses:
-        '200':
-          description: Listado de ofertas paginado
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Offer'
-                  meta:
-                    type: object
-                    description: Metadatos de paginación
-        '401':
-          description: No autorizado
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-      x-explanation: |
-        **Flujo completo del endpoint /offers:**
-        - El cliente envía una petición GET con los filtros deseados.
-        - El backend aplica los filtros usando el filtro `OfferFilter` y el modelo `Offer`.
-        - Se obtienen las ofertas desde la base de datos y se devuelven paginadas.
-        - Si el usuario no está autenticado, se responde con 401.
-
-    post:
-      summary: Crear una nueva oferta (anuncio)
-      tags:
-        - offers
-      description: |
-        Permite a un usuario crear una nueva oferta (anuncio) en la plataforma. Se pueden adjuntar imágenes y se deben enviar varios datos obligatorios.
-
-        **Gestión de imágenes:**
-        - Existe una entidad (modelo y tabla) llamada `Image` en el backend, que representa cada imagen asociada a una oferta.
-        - Cada oferta puede tener varias imágenes, y esta relación se gestiona en la base de datos (relación uno a muchos entre Offer e Image).
-        - Cuando un usuario sube imágenes al crear una oferta, los archivos de imagen se almacenan localmente en la carpeta `storage/app/public` del proyecto.
-        - En la base de datos solo se guarda la ruta (path) y metadatos de la imagen, no el archivo en sí.
-        - Las imágenes quedan accesibles desde la carpeta pública del proyecto y no se almacenan directamente en la base de datos.
-
-        **¿Cómo funciona este endpoint internamente?**
-        1. El cliente envía los datos requeridos por POST a `/offers` (incluyendo imágenes si corresponde).
-        2. La ruta está definida en `backend/routes/api.php` y apunta al método `store` del controlador `OfferController` (`backend/app/Http/Controllers/OfferController.php`).
-        3. Antes de llegar al controlador, los datos pasan por la clase de validación `CreateOfferRequest` (`backend/app/Http/Requests/CreateOfferRequest.php`).
-        4. Si los datos son válidos, el controlador crea un nuevo registro en la tabla `offers` usando el modelo `Offer` (`backend/app/Models/Offer.php`).
-        5. Se crean las relaciones con categorías, dirección, imágenes, etc.
-        6. Se envía una notificación y un email.
-        7. El backend responde con un JSON de éxito o error.
-
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - offer_type_id
-                - category_id
-                - condition_id
-                - title
-                - description
-                - quantity
-                - measure_type_id
-                - address.street
-                - address.street_number
-              properties:
-                offer_type_id:
-                  type: integer
-                  example: 1
-                category_id:
-                  type: integer
-                  example: 2
-                condition_id:
-                  type: integer
-                  example: 1
-                title:
-                  type: string
-                  example: "Cartón para reciclar"
-                description:
-                  type: string
-                  example: "Cartón limpio, listo para retirar."
-                quantity:
-                  type: string
-                  example: "10"
-                measure_type_id:
-                  type: integer
-                  example: 1
-                value_with_shipping:
-                  type: integer
-                  example: 1000
-                value_without_shipping:
-                  type: integer
-                  example: 800
-                pick_by_scraper:
-                  type: boolean
-                  example: true
-                send_by_donor:
-                  type: boolean
-                  example: false
-                address.street:
-                  type: string
-                  example: "Av. Siempre Viva"
-                address.street_number:
-                  type: string
-                  example: "742"
-                address.postal_code:
-                  type: string
-                  example: "1000"
-                address.floor:
-                  type: string
-                  example: "1"
-                address.apartment:
-                  type: string
-                  example: "A"
-                images:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: Imágenes adjuntas (opcional)
-      parameters:
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-          description: Token de autenticación Bearer.
-      responses:
-        '201':
-          description: Oferta creada correctamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: "Publicaciòn creada correctamente"
-        '400':
-          description: Error de validación o negocio
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Hubo un error al crear la publicación. Por favor, inténtelo nuevamente."
-        '422':
-          description: Error de validación de campos
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "The given data was invalid."
-                  errors:
-                    type: object
-      x-explanation: |
-        **Flujo completo del endpoint /offers (POST):**
-        - El cliente envía los datos del anuncio y las imágenes.
-        - Laravel valida los datos usando la clase `CreateOfferRequest`.
-        - El controlador (`OfferController`) crea el anuncio y sus relaciones (categoría, dirección, imágenes).
-        - Se guarda todo en la base de datos.
-        - Se envía una notificación y un email.
-        - Se responde con un mensaje de éxito o error.
-        - Si ocurre un error de validación, se responde con código 422 y detalles de los errores.
-
   /offers/{offerId}:
     get:
       summary: Obtener detalle de una oferta
@@ -1178,7 +872,7 @@ paths:
       tags:
         - postulations
       description: |
-        Devuelve un listado paginado de las postulaciones (ofertas a las que el usuario se postuló).
+        Devuelve un listado paginado de las postulaciones (anuncios a los que el usuario se postuló).
 
         **¿Cómo funciona este endpoint internamente?**
         1. El cliente hace una petición GET a `/postulations`.
