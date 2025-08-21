@@ -20,7 +20,7 @@ paths:
       tags:
         - offers
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: own
           in: query
@@ -30,7 +30,7 @@ paths:
             "false" = solo anuncios de otros usuarios
           schema:
             type: string
-            enum: [true, false]
+            enum: [ true, false ]
           example: "false"
         - name: view
           in: query
@@ -38,7 +38,7 @@ paths:
             Vista especial. "last_offers" excluye anuncios del usuario autenticado
           schema:
             type: string
-            enum: [last_offers]
+            enum: [ last_offers ]
           example: "last_offers"
         - name: categories
           in: query
@@ -144,8 +144,8 @@ paths:
                             - id: 1
                               path: "images/offer/1/xyz123.jpg"
                               bytes: 245760
-                          postulations: []
-                          rating: []
+                          postulations: [ ]
+                          rating: [ ]
                       first_page_url: "http://localhost:8000/api/offers?page=1"
                       from: 1
                       last_page: 3
@@ -162,10 +162,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              examples:
-                unauthorized:
-                  value:
-                    message: "Unauthenticated."
         '422':
           description: Error de validación en parámetros
           content:
@@ -173,275 +169,275 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationError'
 
-      /offers/{id}:
-        get:
-          summary: Obtener anuncio específico
-          description: >-
-            Devuelve los detalles completos de un anuncio específico incluyendo
-            sus relaciones (categorías, usuario, imágenes, postulaciones, etc.).
-          tags:
-            - offers
-          security:
-            - bearerAuth: []
-          parameters:
-            - name: id
-              in: path
-              required: true
-              description: ID único del anuncio
+  /offers/{id}:
+    get:
+      summary: Obtener anuncio específico
+      description: >-
+        Devuelve los detalles completos de un anuncio específico incluyendo
+        sus relaciones (categorías, usuario, imágenes, postulaciones, etc.).
+      tags:
+        - offers
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID único del anuncio
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Anuncio obtenido exitosamente
+          content:
+            application/json:
               schema:
-                type: integer
-              example: 1
-          responses:
-            '200':
-              description: Anuncio obtenido exitosamente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Offer'
-                  examples:
-                    example_success:
-                      value:
-                        id: 1
-                        title: "Vendo cartón en buen estado"
-                        description: "Cartón limpio y seco, ideal para reciclaje"
-                        quantity: "50"
-                        user_id: 123
-                        category_id: 1
-                        offer_type_id: 1
-                        offer_status_id: 1
-                        condition_id: 1
-                        measure_type_id: 2
-                        value_with_shipping: "500"
-                        value_without_shipping: "400"
-                        pick_by_scraper: true
-                        send_by_client: false
-                        valid_until: "2024-02-15T10:30:00Z"
-                        created_at: "2024-01-15T10:30:00Z"
-                        updated_at: "2024-01-15T10:30:00Z"
+                $ref: '#/components/schemas/Offer'
+              examples:
+                example_success:
+                  value:
+                    id: 1
+                    title: "Vendo cartón en buen estado"
+                    description: "Cartón limpio y seco, ideal para reciclaje"
+                    quantity: "50"
+                    user_id: 123
+                    category_id: 1
+                    offer_type_id: 1
+                    offer_status_id: 1
+                    condition_id: 1
+                    measure_type_id: 2
+                    value_with_shipping: "500"
+                    value_without_shipping: "400"
+                    pick_by_scraper: true
+                    send_by_client: false
+                    valid_until: "2024-02-15T10:30:00Z"
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:30:00Z"
+                    user:
+                      id: 123
+                      first_name: "Juan"
+                      last_name: "Pérez"
+                      full_name: "Juan Pérez"
+                      type: "scraper"
+                    category:
+                      id: 1
+                      name: "Cartón"
+                    offer_type:
+                      id: 1
+                      name: "Vender"
+                    offer_status:
+                      id: 1
+                      name: "Pendiente"
+                    condition:
+                      id: 1
+                      name: "Nuevo"
+                    measure_type:
+                      id: 2
+                      name: "Kilogramos"
+                    address:
+                      street: "Av. Corrientes 1234"
+                      neighborhood: "San Nicolás"
+                      city: "Buenos Aires"
+                      province: "Buenos Aires"
+                    images:
+                      - id: 1
+                        path: "images/offer/1/xyz123.jpg"
+                        bytes: 245760
+                    offer_categories:
+                      - id: 1
+                        name: "Cartón"
+                        pivot:
+                          measure_type_id: 2
+                          quantity: 50
+                          condition_id: 1
+                    torkies:
+                      - id: 1
+                        user_id: 456
+                        offer_id: 1
+                        expected_start_pickup_at: "2024-01-20T08:00:00Z"
+                        expected_end_pickup_at: "2024-01-20T10:00:00Z"
                         user:
-                          id: 123
-                          first_name: "Juan"
-                          last_name: "Pérez"
-                          full_name: "Juan Pérez"
-                          type: "scraper"
-                        category:
-                          id: 1
-                          name: "Cartón"
-                        offer_type:
-                          id: 1
-                          name: "Vender"
-                        offer_status:
-                          id: 1
-                          name: "Pendiente"
-                        condition:
-                          id: 1
-                          name: "Nuevo"
-                        measure_type:
-                          id: 2
-                          name: "Kilogramos"
-                        address:
-                          street: "Av. Corrientes 1234"
-                          neighborhood: "San Nicolás"
-                          city: "Buenos Aires"
-                          province: "Buenos Aires"
-                        images:
-                          - id: 1
-                            path: "images/offer/1/xyz123.jpg"
-                            bytes: 245760
-                        offer_categories:
-                          - id: 1
-                            name: "Cartón"
-                            pivot:
-                              measure_type_id: 2
-                              quantity: 50
-                              condition_id: 1
-                        torkies:
-                          - id: 1
-                            user_id: 456
-                            offer_id: 1
-                            expected_start_pickup_at: "2024-01-20T08:00:00Z"
-                            expected_end_pickup_at: "2024-01-20T10:00:00Z"
-                            user:
-                              id: 456
-                              first_name: "María"
-                              last_name: "García"
-                              type: "torky"
-                        postulations: []
-                        rating: []
-            '401':
-              description: No autorizado - Token inválido o ausente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-            '404':
-              description: Anuncio no encontrado
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-                  examples:
-                    not_found:
-                      value:
-                        message: "No query results for model [App\\Models\\Offer] 1"
-
-      /offers/{offer}/close:
-        post:
-          summary: Cerrar un anuncio
-          description: >-
-            Permite al propietario de un anuncio cerrarlo, especificando un motivo.
-            Al cerrar un anuncio, todas las postulaciones pendientes o aceptadas
-            son rechazadas automáticamente y se notifica a los postulantes.
-          tags:
-            - offers
-          security:
-            - bearerAuth: []
-          parameters:
-            - name: offer
-              in: path
-              required: true
-              description: ID del anuncio a cerrar
+                          id: 456
+                          first_name: "María"
+                          last_name: "García"
+                          type: "torky"
+                    postulations: [ ]
+                    rating: [ ]
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
               schema:
-                type: integer
-              example: 1
-          requestBody:
-            required: true
-            content:
-              application/json:
-                schema:
-                  type: object
-                  required:
-                    - reasonId
-                  properties:
-                    reasonId:
-                      type: integer
-                      description: ID del motivo de cierre (ver /closed_reasons)
-                      example: 1
-                examples:
-                  example_request:
-                    value:
-                      reasonId: 1
-          responses:
-            '200':
-              description: Anuncio cerrado exitosamente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/SuccessResponse'
-                  examples:
-                    success:
-                      value:
-                        success: true
-                        message: "¡Anuncio cerrado correctamente!"
-            '400':
-              description: Error - El anuncio ya está cerrado
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  examples:
-                    already_closed:
-                      value:
-                        success: false
-                        message: "El anuncio ya ha sido finalizado"
-            '401':
-              description: No autorizado - Token inválido o ausente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-            '403':
-              description: Prohibido - Solo el propietario puede cerrar el anuncio
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-            '404':
-              description: Anuncio no encontrado
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-
-      /offers/{offer}/ask_question:
-        post:
-          summary: Hacer una pregunta sobre un anuncio
-          description: >-
-            Permite a un usuario autenticado hacer una pregunta sobre un anuncio.
-            Solo se permite una pregunta por usuario por anuncio. Si el usuario
-            ya hizo una pregunta, debe usar el chat para preguntas adicionales.
-            Se crea un mensaje destacado en el chat y se notifica al propietario.
-          tags:
-            - offers
-          security:
-            - bearerAuth: []
-          parameters:
-            - name: offer
-              in: path
-              required: true
-              description: ID del anuncio sobre el que se pregunta
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
               schema:
-                type: integer
-              example: 1
-          requestBody:
-            required: true
-            content:
-              application/json:
-                schema:
-                  type: object
-                  required:
-                    - question
-                  properties:
-                    question:
-                      type: string
-                      description: Texto de la pregunta
-                      maxLength: 1000
-                      example: "¿El cartón está completamente limpio? ¿Incluye transporte?"
-                examples:
-                  example_request:
-                    value:
-                      question: "¿El cartón está completamente limpio? ¿Incluye transporte?"
-          responses:
-            '200':
-              description: Pregunta creada exitosamente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/SuccessResponse'
-                  examples:
-                    success:
-                      value:
-                        success: true
-                        message: "Tu consulta se ha creado correctamente"
-            '400':
-              description: Error - El usuario ya hizo una pregunta
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  examples:
-                    already_asked:
-                      value:
-                        success: false
-                        message: "¡Si tienes mas preguntas puedes usar el chat!"
-            '401':
-              description: No autorizado - Token inválido o ausente
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-            '404':
-              description: Anuncio no encontrado
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-            '422':
-              description: Error de validación
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/ValidationError'
+                $ref: '#/components/schemas/Error'
+              examples:
+                not_found:
+                  value:
+                    message: "No query results for model [App\\Models\\Offer] 1"
+
+  /offers/{offer}/close:
+    post:
+      summary: Cerrar un anuncio
+      description: >-
+        Permite al propietario de un anuncio cerrarlo, especificando un motivo.
+        Al cerrar un anuncio, todas las postulaciones pendientes o aceptadas
+        son rechazadas automáticamente y se notifica a los postulantes.
+      tags:
+        - offers
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          description: ID del anuncio a cerrar
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reasonId
+              properties:
+                reasonId:
+                  type: integer
+                  description: ID del motivo de cierre (ver /closed_reasons)
+                  example: 1
+            examples:
+              example_request:
+                value:
+                  reasonId: 1
+      responses:
+        '200':
+          description: Anuncio cerrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "¡Anuncio cerrado correctamente!"
+        '400':
+          description: Error - El anuncio ya está cerrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_closed:
+                  value:
+                    success: false
+                    message: "El anuncio ya ha sido finalizado"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Prohibido - Solo el propietario puede cerrar el anuncio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /offers/{offer}/ask_question:
+    post:
+      summary: Hacer una pregunta sobre un anuncio
+      description: >-
+        Permite a un usuario autenticado hacer una pregunta sobre un anuncio.
+        Solo se permite una pregunta por usuario por anuncio. Si el usuario
+        ya hizo una pregunta, debe usar el chat para preguntas adicionales.
+        Se crea un mensaje destacado en el chat y se notifica al propietario.
+      tags:
+        - offers
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          description: ID del anuncio sobre el que se pregunta
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+              properties:
+                question:
+                  type: string
+                  description: Texto de la pregunta
+                  maxLength: 1000
+                  example: "¿El cartón está completamente limpio? ¿Incluye transporte?"
+            examples:
+              example_request:
+                value:
+                  question: "¿El cartón está completamente limpio? ¿Incluye transporte?"
+      responses:
+        '200':
+          description: Pregunta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "Tu consulta se ha creado correctamente"
+        '400':
+          description: Error - El usuario ya hizo una pregunta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_asked:
+                  value:
+                    success: false
+                    message: "¡Si tienes mas preguntas puedes usar el chat!"
+        '401':
+          description: No autorizado - Token inválido o ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Anuncio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
     post:
       summary: Crear un nuevo anuncio
       description: >-
@@ -452,7 +448,7 @@ paths:
       tags:
         - offers
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -511,12 +507,12 @@ paths:
                   example: 400
                 pick_by_scraper:
                   type: string
-                  enum: [true, false]
+                  enum: [ true, false ]
                   description: Si el scraper puede recoger el material
                   example: "true"
                 pick_by_donor:
                   type: string
-                  enum: [true, false]
+                  enum: [ true, false ]
                   description: Si el donante puede enviar el material
                   example: "false"
                 address[street]:
@@ -876,7 +872,7 @@ components:
           example: "juan.perez@email.com"
         type:
           type: string
-          enum: [scraper, hogar, torky, admin_localidad]
+          enum: [ scraper, hogar, torky, admin_localidad ]
           example: "scraper"
         phone:
           type: string
